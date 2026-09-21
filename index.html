@@ -1,166 +1,271 @@
-<!doctype html>
+<!DOCTYPE html>
 <html>
 <head>
-<meta charset="utf-8">
+<meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Byenext</title>
 <style>
-*{box-sizing:border-box}body{margin:0;font-family:Arial;background:#111827;color:#111}
-.box{max-width:1000px;margin:30px auto;padding:20px}.card{background:white;padding:22px;border-radius:16px;margin:15px 0}
-.login{max-width:400px;margin:60px auto;text-align:center}.logo{font-size:45px;font-weight:bold;color:#635bff}
-input,textarea{width:100%;padding:13px;margin:7px 0;border:1px solid #ddd;border-radius:9px}
-button{padding:12px 18px;margin:5px;border:0;border-radius:9px;background:#635bff;color:white;font-weight:bold}
-.gray{background:#ddd;color:#111}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:15px}
-.product img{width:100%;height:160px;object-fit:cover;border-radius:10px}.price{font-size:20px;font-weight:bold;color:#635bff}
-.hide{display:none}.msg{margin:10px;padding:10px;background:#eee;border-radius:8px}
+*{box-sizing:border-box}
+body{margin:0;font-family:Arial;background:#111827}
+.wrap{max-width:1100px;margin:auto;padding:20px}
+.card{background:white;border-radius:16px;padding:20px;margin:15px 0}
+.login{max-width:420px;margin:50px auto;text-align:center}
+.logo{font-size:45px;font-weight:bold;color:#635bff}
+input,textarea,select{width:100%;padding:12px;margin:6px 0;border:1px solid #ddd;border-radius:9px}
+button{border:0;border-radius:9px;padding:12px 17px;margin:5px;background:#635bff;color:white;font-weight:bold}
+.gray{background:#ddd;color:#111}
+.red{background:#ef4444}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:15px}
+.product img{width:100%;height:170px;object-fit:cover;border-radius:10px}
+.price{font-size:20px;font-weight:bold;color:#635bff}
+.hide{display:none}
+.msg{padding:10px;margin:8px 0;background:#eee;border-radius:8px}
+.top{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap}
 </style>
 </head>
 <body>
 
-<div id="login" class="box">
+<div id="loginPage" class="wrap">
 <div class="card login">
 <div class="logo">B</div>
 <h1>Byenext</h1>
 <p>Welcome to Byenext</p>
-<input id="email" placeholder="Email">
-<input id="pass" type="password" placeholder="Password">
-<button onclick="login()">Login</button>
-<button class="gray" onclick="signupBox()">Create Account</button>
-<div id="msg" class="msg"></div>
+<input id="loginEmail" placeholder="Email">
+<input id="loginPass" type="password" placeholder="Password">
+<button onclick="doLogin()">Login</button>
+<button class="gray" onclick="page('signup')">Create Account</button>
+<button class="gray" onclick="page('sellerSignup')">Become a Seller</button>
+<div id="loginMsg" class="msg"></div>
 </div>
 </div>
 
-<div id="signup" class="box hide">
+<div id="signupPage" class="wrap hide">
 <div class="card login">
 <h2>Create Account</h2>
-<input id="name" placeholder="Name">
-<input id="semail" placeholder="Email">
-<input id="spass" type="password" placeholder="Password">
-<button onclick="signup()">Create Account</button>
-<button class="gray" onclick="back()">Back</button>
-<div id="smsg" class="msg"></div>
+<input id="custName" placeholder="Name">
+<input id="custEmail" placeholder="Email">
+<input id="custPass" type="password" placeholder="Password">
+<button onclick="doSignup()">Create Account</button>
+<button class="gray" onclick="page('login')">Back</button>
+<div id="signupMsg" class="msg"></div>
 </div>
 </div>
 
-<div id="app" class="box hide">
+<div id="sellerSignupPage" class="wrap hide">
+<div class="card login">
+<h2>Become a Seller</h2>
+<input id="sellerName" placeholder="Seller Name">
+<input id="sellerEmail" placeholder="Email">
+<input id="sellerPass" type="password" placeholder="Password">
+<button onclick="doSellerSignup()">Register Seller</button>
+<button class="gray" onclick="page('login')">Back</button>
+<div id="sellerMsg" class="msg"></div>
+</div>
+</div>
+
+<div id="appPage" class="wrap hide">
 <div class="card">
+<div class="top">
 <h2>🛍️ Byenext</h2>
+<div>
 <button onclick="home()">Shop</button>
-<button onclick="orders()">My Orders</button>
-<button onclick="cartPage()">🛒 Cart <span id="count">0</span></button>
-<button onclick="logout()">Logout</button>
+<button onclick="showOrders()">Orders</button>
+<button onclick="cartPage()">🛒 Cart (<span id="cartCount">0</span>)</button>
+<button id="sellerButton" class="hide" onclick="sellerPanel()">Seller</button>
+<button id="adminButton" class="hide" onclick="adminPanel()">Admin</button>
+<button class="red" onclick="logout()">Logout</button>
+</div>
+</div>
 </div>
 <div id="content"></div>
 </div>
 
 <script>
 let token=localStorage.getItem("token");
-let products=[],cart=[],user=null;
+let me=null;
+let products=[];
+let cart=[];
+
+const E=id=>document.getElementById(id);
 
 async function api(url,opt={}){
- opt.headers={"Content-Type":"application/json",...(opt.headers||{})};
+ opt.headers=Object.assign({"Content-Type":"application/json"},opt.headers||{});
  if(token)opt.headers.Authorization="Bearer "+token;
- let r=await fetch(url,opt),d=await r.json().catch(()=>({}));
+ const r=await fetch(url,opt);
+ const d=await r.json().catch(()=>({}));
  if(!r.ok)throw Error(d.error||"Request failed");
  return d;
 }
 
-function signupBox(){
- document.getElementById("login").classList.add("hide");
- document.getElementById("signup").classList.remove("hide");
-}
-function back(){
- document.getElementById("signup").classList.add("hide");
- document.getElementById("login").classList.remove("hide");
+function page(x){
+ E("loginPage").classList.toggle("hide",x!="login");
+ E("signupPage").classList.toggle("hide",x!="signup");
+ E("sellerSignupPage").classList.toggle("hide",x!="sellerSignup");
 }
 
-async function login(){
+async function doLogin(){
  try{
-  let d=await api("/api/login",{method:"POST",body:JSON.stringify({
-   email:email.value,password:pass.value
-  })});
-  token=d.token;user=d.user;localStorage.setItem("token",token);
+  const d=await api("/api/login",{
+   method:"POST",
+   body:JSON.stringify({
+    email:E("loginEmail").value,
+    password:E("loginPass").value
+   })
+  });
+  token=d.token;
+  me=d.user;
+  localStorage.setItem("token",token);
   openApp();
- }catch(e){msg.textContent=e.message}
+ }catch(e){E("loginMsg").textContent=e.message}
 }
 
-async function signup(){
+async function doSignup(){
  try{
-  let d=await api("/api/register",{method:"POST",body:JSON.stringify({
-   name:name.value,email:semail.value,password:spass.value
-  })});
-  token=d.token;user=d.user;localStorage.setItem("token",token);
+  const d=await api("/api/register",{
+   method:"POST",
+   body:JSON.stringify({
+    name:E("custName").value,
+    email:E("custEmail").value,
+    password:E("custPass").value
+   })
+  });
+  token=d.token;
+  me=d.user;
+  localStorage.setItem("token",token);
   openApp();
- }catch(e){smsg.textContent=e.message}
+ }catch(e){E("signupMsg").textContent=e.message}
+}
+
+async function doSellerSignup(){
+ try{
+  const d=await api("/api/register-seller",{
+   method:"POST",
+   body:JSON.stringify({
+    name:E("sellerName").value,
+    email:E("sellerEmail").value,
+    password:E("sellerPass").value
+   })
+  });
+  token=d.token;
+  me=d.user;
+  localStorage.setItem("token",token);
+  openApp();
+ }catch(e){E("sellerMsg").textContent=e.message}
 }
 
 async function openApp(){
- login.classList.add("hide");signup.classList.add("hide");
- app.classList.remove("hide");await load();home();
+ E("loginPage").classList.add("hide");
+ E("signupPage").classList.add("hide");
+ E("sellerSignupPage").classList.add("hide");
+ E("appPage").classList.remove("hide");
+
+ E("sellerButton").classList.toggle("hide",me.role!="seller");
+ E("adminButton").classList.toggle("hide",me.role!="admin");
+
+ await loadProducts();
+ home();
 }
 
-async function load(){products=await api("/api/products")}
+async function loadProducts(){
+ products=await api("/api/products");
+}
 
 function home(){
  let h='<div class="card"><h2>Products</h2><div class="grid">';
  products.forEach(p=>{
- h+=`<div class="card product">
- <img src="${p.image||""}" onerror="this.style.display='none'">
- <h3>${p.name}</h3><p>${p.description||""}</p>
- <div class="price">₹${p.price}</div>
- <button onclick="add(${p.id})">Add to Cart</button>
- </div>`;
+  h+=`<div class="card product">
+  <img src="${p.image||""}" onerror="this.style.display='none'">
+  <h3>${p.name}</h3>
+  <p>${p.description||""}</p>
+  <div class="price">₹${p.price}</div>
+  <p>Stock: ${p.stock}</p>
+  <button onclick="addCart(${p.id})">Add to Cart</button>
+  </div>`;
  });
- h+='</div></div>';content.innerHTML=h;
+ h+="</div></div>";
+ E("content").innerHTML=h;
 }
 
-function add(id){
- let x=cart.find(a=>a.id==id);
- if(x)x.qty++;else cart.push({id:id,qty:1});
- count.textContent=cart.reduce((a,b)=>a+b.qty,0);
+function addCart(id){
+ const x=cart.find(a=>a.id==id);
+ if(x)x.qty++;
+ else cart.push({id:id,qty:1});
+ updateCart();
  alert("Added to cart");
 }
 
+function updateCart(){
+ E("cartCount").textContent=cart.reduce((a,b)=>a+b.qty,0);
+}
+
 function cartPage(){
- let total=0,h='<div class="card"><h2>🛒 Cart</h2>';
- cart.forEach(x=>{
-  let p=products.find(a=>a.id==x.id);
-  total+=p.price*x.qty;
-  h+=`<div class="msg">${p.name} × ${x.qty} = ₹${p.price*x.qty}</div>`;
- });
- let fee=total*.01;
+ let total=0;
+ let h='<div class="card"><h2>🛒 Cart</h2>';
+
+ if(!cart.length){
+  h+="<p>Cart is empty.</p>";
+ }else{
+  cart.forEach(x=>{
+   const p=products.find(a=>a.id==x.id);
+   if(p){
+    total+=p.price*x.qty;
+    h+=`<div class="msg">${p.name} × ${x.qty} = ₹${p.price*x.qty}
+    <button onclick="removeCart(${p.id})">Remove</button></div>`;
+   }
+  });
+ }
+
+ const fee=total*.01;
  h+=`<h3>Subtotal: ₹${total}</h3>
- <p>Service fee 1%: ₹${fee.toFixed(2)}</p>
+ <p>Service Fee 1%: ₹${fee.toFixed(2)}</p>
  <h2>Total: ₹${(total+fee).toFixed(2)}</h2>
- <textarea id="address" placeholder="Delivery address"></textarea>
- <button onclick="order()">Place Order</button></div>`;
- content.innerHTML=h;
+ <textarea id="deliveryAddress" placeholder="Delivery address"></textarea>
+ <button onclick="placeOrder()">Place Order</button></div>`;
+
+ E("content").innerHTML=h;
 }
 
-async function order(){
+function removeCart(id){
+ cart=cart.filter(x=>x.id!=id);
+ updateCart();
+ cartPage();
+}
+
+async function placeOrder(){
+ if(!cart.length){alert("Cart is empty");return}
+ if(!E("deliveryAddress").value.trim()){
+  alert("Delivery address required");
+  return;
+ }
  try{
-  let d=await api("/api/orders",{method:"POST",body:JSON.stringify({
-   items:cart,address:address.value
-  })});
-  alert("Order #"+d.orderId+" created");
-  cart=[];count.textContent=0;orders();
+  const d=await api("/api/orders",{
+   method:"POST",
+   body:JSON.stringify({
+    items:cart,
+    address:E("deliveryAddress").value
+   })
+  });
+  alert("Order #"+d.orderId+" placed");
+  cart=[];
+  updateCart();
+  showOrders();
  }catch(e){alert(e.message)}
 }
 
-async function orders(){
+async function showOrders(){
  try{
-  let a=await api("/api/orders"),h='<div class="card"><h2>My Orders</h2>';
-  a.forEach(o=>h+=`<div class="card"><b>Order #${o.id}</b>
-  <p>Status: ${o.status}</p><p>Total: ₹${o.total}</p></div>`);
-  h+='</div>';content.innerHTML=h;
+  const a=await api("/api/orders");
+  let h='<div class="card"><h2>Orders</h2>';
+  if(!a.length)h+="<p>No orders yet.</p>";
+  a.forEach(o=>{
+   h+=`<div class="card">
+   <h3>Order #${o.id}</h3>
+   <p>Status: <b>${o.status}</b></p>
+   <p>Total: ₹${o.total}</p>
+   <p>Address: ${o.address}</p>
+   </div>`;
+  });
+  h+="</div>";
+  E("content").innerHTML=h;
  }catch(e){alert(e.message)}
 }
-
-function logout(){
- localStorage.removeItem("token");token=null;
- app.classList.add("hide");login.classList.remove("hide");
-}
-if(token)openApp().catch(logout);
-</script>
-</body>
-</html>
