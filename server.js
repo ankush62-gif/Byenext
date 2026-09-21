@@ -58,7 +58,7 @@ if (fs.existsSync(DATA_FILE)) {
 const admin = data.users.find(u => u.role === "admin");
 
 if (admin) {
-  admin."admin@byenext.com";
+  admin.email = "admin@byenext.com";
   admin.password = "Ankush@2009";
 }
 function saveData() {
