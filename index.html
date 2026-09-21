@@ -1,4 +1,4 @@
-<button id="adminBtn" style="display:none" onclick="show('admin')">Admin</button>
+id="adminBtn" style="display:none" onclick="show('admin')">Admin</button>
 <header><div class="logo">Byenext</div><nav><button onclick="show('shop')">Shop</button><button onclick="show('orders')">My Orders</button><button onclick="show('admin')">Admin</button><button onclick="logout()">Logout</button></nav></header>
 <main><section id="shop"><h1>Shop with Byenext</h1><p class="muted">Simple online ordering platform</p><div id="products" class="grid"></div></section>
 <section id="orders" class="hidden"><h2>My Orders</h2><div id="orderList"></div></section>
@@ -21,5 +21,5 @@ async function loadAdmin(){try{let os=await api("/api/orders"),ps=await api("/ap
 async function status(id,s){await api("/api/orders/"+id,{method:"PUT",body:JSON.stringify({status:s})});loadAdmin()}
 async function addProduct(){await api("/api/products",{method:"POST",body:JSON.stringify({name:$("n").value,price:+$("pr").value,image:$("im").value,description:"Byenext product",stock:+$("st").value})});loadAdmin();load()}
 async function del(id){await api("/api/products/"+id,{method:"DELETE"});loadAdmin();load()}
-if(token){$("login").classList.add("hidden");load()}else $("login").classList.remove("hidden");renderCart();
+if(token){try{role=JSON.parse(atob(token.split('.')[1])).role}catch(e){}$("adminBtn").style.display=role==="admin"?"inline-block":"none";$("login").classList.add("hidden");load()}else{$("login").classList.remove("hidden");}
 </script></body></html>
