@@ -4,118 +4,248 @@ box-sizing:border-box;
 
 body{
 margin:0;
-font-family:Arial,sans-serif;
-background:#f5f8ff;
+font-family:Arial,Helvetica,sans-serif;
+background:#07152f;
 color:#172033;
+min-height:100vh;
 }
 
-header{
-background:#111827;
+.topbar{
+height:96px;
+padding:0 5.5%;
+background:linear-gradient(100deg,#07152f,#111d50);
 color:white;
-padding:18px 5%;
 display:flex;
 align-items:center;
 justify-content:space-between;
+border-bottom:1px solid rgba(255,255,255,.08);
+}
+
+.brand{
+display:flex;
+align-items:center;
+gap:14px;
+}
+
+.brandIcon,
+.loginLogo{
+display:flex;
+align-items:center;
+justify-content:center;
+font-weight:900;
+color:white;
+background:linear-gradient(135deg,#20c7ff,#7b2cff);
+box-shadow:0 8px 25px rgba(70,80,255,.35);
+}
+
+.brandIcon{
+width:48px;
+height:48px;
+border-radius:12px;
+font-size:30px;
 }
 
 .logo{
-font-size:30px;
+font-size:34px;
 font-weight:800;
 }
 
 nav{
 display:flex;
-gap:12px;
+gap:14px;
+}
+
+nav button{
+background:rgba(255,255,255,.07);
+border:1px solid rgba(255,255,255,.2);
+color:white;
+border-radius:28px;
+padding:13px 22px;
+font-size:15px;
+font-weight:600;
 }
 
 button{
 border:0;
-border-radius:10px;
-padding:12px 20px;
-font-size:15px;
-font-weight:600;
 cursor:pointer;
-background:#2563eb;
-color:white;
-}
-
-nav button{
-background:white;
-color:#172033;
+transition:.2s;
 }
 
 button:hover{
-opacity:.9;
+transform:translateY(-1px);
+opacity:.94;
 }
 
 main{
+min-height:calc(100vh - 96px);
+background:
+radial-gradient(circle at 5% 20%,rgba(65,80,220,.3),transparent 25%),
+radial-gradient(circle at 95% 85%,rgba(55,70,220,.3),transparent 30%),
+linear-gradient(120deg,#07152f,#111d50);
 padding:55px 5%;
 }
 
-h1{
-font-size:36px;
-margin-bottom:10px;
+.hero{
+max-width:1400px;
+margin:auto;
+min-height:500px;
+display:flex;
+align-items:center;
+justify-content:space-between;
+gap:50px;
 }
 
-h2{
-font-size:28px;
+.heroText{
+width:52%;
+color:white;
 }
 
-.muted{
-color:#6b7280;
+.heroText h1{
+font-size:54px;
+margin:0 0 15px;
+line-height:1.1;
+}
+
+.heroText h1 span{
+background:linear-gradient(90deg,#b34cff,#218cff);
+-webkit-background-clip:text;
+background-clip:text;
+color:transparent;
+}
+
+.heroSub{
+font-size:24px;
+color:#aebbd8;
+margin-bottom:45px;
+}
+
+.features{
+display:flex;
+flex-direction:column;
+gap:25px;
+}
+
+.feature{
+display:flex;
+align-items:center;
+gap:18px;
+}
+
+.featureIcon{
+width:58px;
+height:58px;
+border-radius:16px;
+display:flex;
+align-items:center;
+justify-content:center;
+font-size:27px;
+background:linear-gradient(135deg,#3d39d8,#176eea);
+box-shadow:0 8px 25px rgba(35,90,255,.3);
+}
+
+.feature b{
 font-size:18px;
 }
 
+.feature p{
+margin:7px 0 0;
+color:#9faccc;
+font-size:15px;
+}
+
+.heroProducts{
+width:38%;
+height:330px;
+position:relative;
+display:flex;
+align-items:center;
+justify-content:center;
+}
+
+.shoppingBag{
+font-size:150px;
+filter:drop-shadow(0 20px 30px rgba(80,50,255,.4));
+}
+
+.shoppingCart{
+position:absolute;
+font-size:90px;
+bottom:35px;
+right:20%;
+}
+
+.box{
+position:absolute;
+font-size:70px;
+right:5%;
+bottom:25px;
+}
+
+.shopTitle{
+color:white;
+font-size:32px;
+margin:30px auto 20px;
+max-width:1400px;
+}
+
 .grid{
+max-width:1400px;
+margin:auto;
 display:grid;
 grid-template-columns:repeat(3,1fr);
 gap:22px;
-margin-top:25px;
 }
 
 .product{
 background:white;
-border-radius:16px;
-padding:16px;
-box-shadow:0 8px 25px rgba(0,0,0,.07);
+border-radius:20px;
+padding:18px;
+box-shadow:0 15px 40px rgba(0,0,0,.2);
 }
 
 .product img{
 width:100%;
-height:230px;
+height:220px;
 object-fit:cover;
-border-radius:12px;
-background:#f3f4f6;
+border-radius:14px;
+background:#f3f5fa;
 }
 
 .product h3{
 font-size:21px;
-margin-bottom:8px;
+margin:15px 0 8px;
 }
 
 .product p{
-color:#4b5563;
+color:#667085;
 }
 
 .product b{
 display:block;
-font-size:19px;
+font-size:20px;
 margin:14px 0;
 }
 
 .product button{
 width:100%;
+padding:13px;
+border-radius:11px;
+background:linear-gradient(90deg,#673cff,#147df5);
+color:white;
+font-size:15px;
+font-weight:700;
 }
 
 .cart{
 position:fixed;
 right:25px;
-top:120px;
+top:125px;
 width:370px;
 background:white;
 padding:25px;
-border-radius:18px;
-box-shadow:0 10px 35px rgba(0,0,0,.12);
+border-radius:20px;
+box-shadow:0 20px 50px rgba(0,0,0,.2);
+z-index:50;
 }
 
 .cart h3{
@@ -124,15 +254,20 @@ font-size:22px;
 
 .cart input{
 width:100%;
-padding:13px;
-border:1px solid #d1d5db;
+padding:14px;
+border:1px solid #d9dfeb;
 border-radius:10px;
 margin:15px 0;
 font-size:15px;
 }
 
-.cart button{
+.cart>button{
 width:100%;
+padding:14px;
+border-radius:11px;
+background:#1769e8;
+color:white;
+font-weight:700;
 }
 
 .item{
@@ -144,70 +279,116 @@ justify-content:space-between;
 
 .order{
 background:white;
-padding:18px;
+padding:20px;
 margin:15px 0;
-border-radius:14px;
-box-shadow:0 5px 18px rgba(0,0,0,.06);
+border-radius:15px;
+box-shadow:0 8px 25px rgba(0,0,0,.1);
 }
 
 .hidden{
 display:none !important;
 }
 
+/* LOGIN */
+
 .modal{
 position:fixed;
 inset:0;
-background:rgba(0,0,0,.55);
+background:rgba(2,8,25,.62);
+backdrop-filter:blur(8px);
 display:flex;
 align-items:center;
 justify-content:center;
-padding:20px;
+padding:25px;
 z-index:1000;
 }
 
-.modal .card{
+.loginCard{
 width:100%;
-max-width:440px;
-background:white;
-padding:30px;
-border-radius:20px;
-box-shadow:0 20px 60px rgba(0,0,0,.2);
-}
-
-.modal h2{
+max-width:520px;
+background:#fff;
+padding:38px 40px;
+border-radius:25px;
+box-shadow:0 30px 80px rgba(0,0,0,.35);
 text-align:center;
-font-size:30px;
-margin-bottom:25px;
 }
 
-.modal input{
-display:block;
-width:100%;
-padding:15px;
-margin:12px 0;
-border:1px solid #d1d5db;
-border-radius:10px;
+.loginLogo{
+width:62px;
+height:62px;
+border-radius:16px;
+font-size:40px;
+margin:0 auto 15px;
+}
+
+.loginCard h2{
+font-size:32px;
+margin:5px 0 10px;
+color:#101b3d;
+}
+
+.welcome{
+color:#7080a5;
 font-size:16px;
-outline:none;
+margin-bottom:30px;
 }
 
-.modal input:focus{
-border-color:#2563eb;
-box-shadow:0 0 0 3px rgba(37,99,235,.12);
+.inputBox{
+height:62px;
+border:1px solid #dce3ef;
+border-radius:14px;
+display:flex;
+align-items:center;
+padding:0 16px;
+margin:14px 0;
+background:white;
 }
 
-.modal button{
+.inputBox>span{
+font-size:20px;
+margin-right:13px;
+}
+
+.inputBox input{
+border:0;
+outline:0;
 width:100%;
-margin-top:10px;
 font-size:16px;
+background:transparent;
+color:#172033;
 }
 
-.modal .secondary{
-background:#374151;
+.eye{
+background:none;
+font-size:18px;
+padding:5px;
+}
+
+.loginButton{
+width:100%;
+height:58px;
+border-radius:14px;
+background:linear-gradient(90deg,#7138ff,#087cf4);
+color:white;
+font-size:18px;
+font-weight:700;
+margin-top:12px;
+box-shadow:0 10px 25px rgba(64,85,240,.25);
+}
+
+.createButton{
+width:100%;
+height:58px;
+border-radius:14px;
+background:white;
+border:1px solid #bdc8dc;
+color:#172033;
+font-size:17px;
+font-weight:700;
+margin-top:14px;
 }
 
 #msg{
-text-align:center;
 color:#dc2626;
 margin-top:15px;
 }
@@ -226,7 +407,36 @@ border:1px solid #d1d5db;
 border-radius:8px;
 }
 
+/* MOBILE */
+
 @media(max-width:900px){
+
+.hero{
+flex-direction:column;
+text-align:center;
+padding-top:20px;
+}
+
+.heroText{
+width:100%;
+}
+
+.heroText h1{
+font-size:42px;
+}
+
+.heroProducts{
+width:100%;
+height:180px;
+}
+
+.shoppingBag{
+font-size:100px;
+}
+
+.features{
+text-align:left;
+}
 
 .grid{
 grid-template-columns:1fr 1fr;
@@ -234,22 +444,23 @@ grid-template-columns:1fr 1fr;
 
 .cart{
 position:static;
-width:auto;
-margin:20px;
+width:100%;
+margin:20px 0;
 }
 
 }
 
 @media(max-width:600px){
 
-header{
+.topbar{
+height:auto;
 padding:15px;
 flex-direction:column;
 gap:15px;
 }
 
 .logo{
-font-size:27px;
+font-size:28px;
 }
 
 nav{
@@ -263,27 +474,41 @@ padding:10px 14px;
 }
 
 main{
-padding:30px 15px;
+padding:25px 15px;
 }
 
-h1{
-font-size:30px;
+.hero{
+min-height:auto;
+}
+
+.heroText h1{
+font-size:36px;
+}
+
+.heroSub{
+font-size:18px;
+margin-bottom:30px;
+}
+
+.heroProducts{
+display:none;
 }
 
 .grid{
 grid-template-columns:1fr;
 }
 
-.product img{
-height:200px;
+.loginCard{
+padding:30px 20px;
+border-radius:20px;
 }
 
-.cart{
-margin:15px 0;
+.loginCard h2{
+font-size:28px;
 }
 
-.modal .card{
-padding:25px 20px;
+.modal{
+padding:15px;
 }
 
 }
