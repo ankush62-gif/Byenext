@@ -269,3 +269,132 @@ async function showOrders(){
   E("content").innerHTML=h;
  }catch(e){alert(e.message)}
 }
+ 
+async function sellerPanel(){
+ try{
+  const a=await api("/api/seller/products");
+  let h='<div class="card"><h2>Seller Dashboard</h2>';
+  h+='<input id="pn" placeholder="Product name">';
+  h+='<input id="pd" placeholder="Description">';
+  h+='<input id="pp" type="number" placeholder="Price">';
+  h+='<input id="ps" type="number" placeholder="Stock">';
+  h+='<input id="pi" placeholder="Image URL">';
+  h+='<input id="pf" type="file" accept="image/*">';
+  h+='<button onclick="addProduct()">Add Product</button></div>';
+  h+='<div class="card"><h3>My Products</h3>';
+
+  a.forEach(p=>{
+   h+=`<div class="msg"><b>${p.name}</b> ₹${p.price}
+   | Stock: ${p.stock}
+   <button class="red" onclick="deleteProduct(${p.id})">Delete</button>
+   </div>`;
+  });
+
+  h+='</div>';
+  E("content").innerHTML=h;
+ }catch(e){alert(e.message)}
+}
+
+function readImage(){
+ return new Promise(resolve=>{
+  const f=E("pf").files[0];
+  if(!f)return resolve("");
+  const r=new FileReader();
+  r.onload=()=>resolve(r.result);
+  r.readAsDataURL(f);
+ });
+}
+
+async function addProduct(){
+ try{
+  let image=await readImage();
+  if(!image)image=E("pi").value;
+
+  await api("/api/seller/products",{
+   method:"POST",
+   body:JSON.stringify({
+    name:E("pn").value,
+    description:E("pd").value,
+    price:Number(E("pp").value),
+    stock:Number(E("ps").value),
+    image:image
+   })
+  });
+
+  alert("Product added successfully");
+  await loadProducts();
+  sellerPanel();
+ }catch(e){alert(e.message)}
+}
+
+async function deleteProduct(id){
+ if(!confirm("Delete this product?"))return;
+ try{
+  await api("/api/seller/products/"+id,{method:"DELETE"});
+  await loadProducts();
+  sellerPanel();
+ }catch(e){alert(e.message)}
+}
+
+async function adminPanel(){
+ try{
+  const a=await api("/api/orders");
+  let h='<div class="card"><h2>Admin Panel</h2>';
+  h+='<p>Admin: '+me.email+'</p>';
+
+  if(!a.length)h+='<p>No orders.</p>';
+
+  a.forEach(o=>{
+   h+=`<div class="card">
+   <h3>Order #${o.id}</h3>
+   <p>Total: ₹${o.total}</p>
+   <p>Customer: ${o.userEmail||""}</p>
+   <p>Status: <b>${o.status}</b></p>
+   <select onchange="changeStatus(${o.id},this.value)">
+   <option ${o.status=="Pending"?"selected":""}>Pending</option>
+   <option ${o.status=="Confirmed"?"selected":""}>Confirmed</option>
+   <option ${o.status=="Shipped"?"selected":""}>Shipped</option>
+   <option ${o.status=="Delivered"?"selected":""}>Delivered</option>
+   <option ${o.status=="Cancelled"?"selected":""}>Cancelled</option>
+   </select>
+   </div>`;
+  });
+
+  h+='</div>';
+  E("content").innerHTML=h;
+ }catch(e){alert(e.message)}
+}
+
+async function changeStatus(id,status){
+ try{
+  await api("/api/orders/"+id,{
+   method:"PUT",
+   body:JSON.stringify({status:status})
+  });
+  alert("Status updated");
+  adminPanel();
+ }catch(e){alert(e.message)}
+}
+
+function logout(){
+ localStorage.removeItem("token");
+ token=null;
+ me=null;
+ cart=[];
+ E("appPage").classList.add("hide");
+ E("loginPage").classList.remove("hide");
+}
+
+if(token){
+ openApp().catch(()=>{
+  localStorage.removeItem("token");
+  token=null;
+  page("login");
+ });
+}else{
+ page("login");
+}
+
+</script>
+</body>
+</html>
