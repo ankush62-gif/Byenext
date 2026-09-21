@@ -55,7 +55,12 @@ if (fs.existsSync(DATA_FILE)) {
     console.log("Starting with fresh data");
   }
 }
+const admin = data.users.find(u => u.role === "admin");
 
+if (admin) {
+  admin.email = "ankushpatel9605@gmail.com";
+  admin.password = "Ankush@2009";
+}
 function saveData() {
   fs.writeFileSync(DATA_FILE, JSON.stringify(data, null, 2));
 }
