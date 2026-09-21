@@ -1,1916 +1,811 @@
-<!doctype html>
-<html>
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Byenext</title>
+const express = require("express");
+const path = require("path");
+const fs = require("fs");
+const crypto = require("crypto");
 
-<link rel="stylesheet" href="/style.css">
+const app = express();
+const PORT = process.env.PORT || 3000;
+const DATA_FILE = path.join(__dirname, "data.json");
 
-<style>
-.sellerBox{
-  background:white;
-  padding:25px;
-  border-radius:18px;
-  box-shadow:0 8px 30px rgba(0,0,0,.08);
-  margin-top:20px;
-}
+app.use(express.json());
 
-.sellerGrid{
-  display:grid;
-  grid-template-columns:repeat(2,1fr);
-  gap:20px;
-}
+let data = {
+  users: [
+    {
+      id: 1,
+      name: "Admin",
+      email: "admin@byenext.com",
+      password: "Ankush@2009",
+      role: "admin"
+    }
+  ],
+  products: [
+    {
+      id: 1,
+      name: "Smart watch",
+      description: "Latest smartphone",
+      price: 999,
+      image: "https://via.placeholder.com/300x200?text=Smartphone",
+      stock: 20,
+      sellerId: null
+    },
+    {
+      id: 2,
+      name: "Headphones",
+      description: "Wireless headphones",
+      price: 1499,
+      image: "https://via.placeholder.com/300x200?text=Headphones",
+      stock: 30,
+      sellerId: null
+    },
+    {
+      id: 3,
+      name: "Smart Watch",
+      description: "Fitness smart watch",
+      price: 2499,
+      image: "https://via.placeholder.com/300x200?text=Smart+Watch",
+      stock: 15,
+      sellerId: null
+    }
+  ],
+  orders: []
+};
 
-.sellerCard{
-  background:#f8fafc;
-  padding:20px;
-  border-radius:14px;
-  border:1px solid #e5e7eb;
-}
-
-.sellerCard input,
-.sellerCard textarea{
-  width:100%;
-  padding:12px;
-  margin:7px 0;
-  border:1px solid #d1d5db;
-  border-radius:9px;
-  box-sizing:border-box;
-}
-
-.sellerCard textarea{
-  min-height:80px;
-  resize:vertical;
-}
-
-.sellerProduct{
-  background:white;
-  border:1px solid #e5e7eb;
-  padding:15px;
-  margin:10px 0;
-  border-radius:12px;
-}
-
-.sellerProduct button{
-  margin:5px 5px 0 0;
-}
-
-.sellerTitle{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  gap:10px;
-  flex-wrap:wrap;
-}
-
-.sellerBadge{
-  background:#ede9fe;
-  color:#6d28d9;
-  padding:7px 12px;
-  border-radius:20px;
-  font-weight:bold;
-}
-
-.sellerLoginBtn{
-  background:linear-gradient(135deg,#2563eb,#7c3aed);
-  color:white;
-}
-
-.danger{
-  background:#dc2626 !important;
-}
-
-.secondary{
-  background:#374151 !important;
-}
-
-@media(max-width:700px){
-  .sellerGrid{
-    grid-template-columns:1fr;
+if (fs.existsSync(DATA_FILE)) {
+  try {
+    data = JSON.parse(fs.readFileSync(DATA_FILE, "utf8"));
+  } catch (e) {
+    console.log("Starting with fresh data");
   }
 }
-</style>
 
-</head>
-
-<body>
-
-<header class="topbar">
-
-  <div class="brand">
-    <div class="brandIcon">B</div>
-    <div class="logo">Byenext</div>
-  </div>
-
-  <nav>
-
-    <button onclick="show('shop')">
-      🛒 Shop
-    </button>
-
-    <button onclick="show('orders')">
-      🛍 My Orders
-    </button>
-
-    <button
-      id="sellerBtn"
-      style="display:none"
-      onclick="show('seller')">
-      🏪 Seller
-    </button>
-
-    <button
-      id="adminBtn"
-      style="display:none"
-      onclick="show('admin')">
-      ⚙ Admin
-    </button>
-
-    <button onclick="logout()">
-      ↪ Logout
-    </button>
-
-  </nav>
-
-</header>
-
-
-<main>
-
-<section id="shop">
-
-  <div class="hero">
-
-    <div class="heroText">
-
-      <h1>
-        Shop with <span>Byenext</span>
-      </h1>
-
-      <p class="heroSub">
-        Simple online ordering platform
-      </p>
-
-      <div class="features">
-
-        <div class="feature">
-          <div class="featureIcon">⚡</div>
-          <div>
-            <b>Fast & Easy Ordering</b>
-            <p>
-              Order your favorite products in just a few clicks.
-            </p>
-          </div>
-        </div>
-
-        <div class="feature">
-          <div class="featureIcon">🛡</div>
-          <div>
-            <b>Secure Payments</b>
-            <p>
-              Your transactions are safe and protected.
-            </p>
-          </div>
-        </div>
-
-        <div class="feature">
-          <div class="featureIcon">🚚</div>
-          <div>
-            <b>Fast Delivery</b>
-            <p>
-              Get your orders delivered to your doorstep.
-            </p>
-          </div>
-        </div>
-
-      </div>
-
-    </div>
-
-    <div class="heroProducts">
-      <div class="shoppingBag">🛍️</div>
-      <div class="shoppingCart">🛒</div>
-      <div class="box">📦</div>
-    </div>
-
-  </div>
-
-
-  <h2 class="shopTitle">
-    Our Products
-  </h2>
-
-  <div id="products" class="grid"></div>
-
-</section>
-
-
-<section id="orders" class="hidden">
-
-  <h2>My Orders</h2>
-
-  <div id="orderList"></div>
-
-</section>
-
-
-<section id="seller" class="hidden">
-
-  <div class="sellerBox">
-
-    <div class="sellerTitle">
-
-      <div>
-        <h2>🏪 Seller Dashboard</h2>
-        <p class="muted">
-          Manage your products and seller orders.
-        </p>
-      </div>
-
-      <span class="sellerBadge">
-        SELLER
-      </span>
-
-    </div>
-
-
-    <div class="sellerGrid">
-
-      <div class="sellerCard">
-
-        <h3>➕ Add Product</h3>
-
-        <input
-          id="sellerName"
-          placeholder="Product name">
-
-        <textarea
-          id="sellerDescription"
-          placeholder="Product description"></textarea>
-
-        <input
-          id="sellerPrice"
-          type="number"
-          placeholder="Price">
-
-        <input
-          id="sellerStock"
-          type="number"
-          placeholder="Stock">
-
-        <input
-          id="sellerImage"
-          placeholder="Image URL">
-
-        <button onclick="addSellerProduct()">
-          Add Product
-        </button>
-
-      </div>
-
-
-      <div class="sellerCard">
-
-        <h3>📦 Seller Orders</h3>
-
-        <div id="sellerOrders">
-          Loading...
-        </div>
-
-      </div>
-
-    </div>
-
-
-    <h3>
-      📦 My Products
-    </h3>
-
-    <div id="sellerProducts">
-      Loading...
-    </div>
-
-  </div>
-
-</section>
-
-
-<section id="admin" class="hidden">
-
-  <h2>Admin Panel</h2>
-
-  <div id="adminBox"></div>
-
-</section>
-
-</main>
-
-
-<div id="cart" class="cart">
-
-  <h3>🛒 Cart</h3>
-
-  <div id="cartItems"></div>
-
-  <b>
-    Total: ₹<span id="total">0</span>
-  </b>
-
-  <input
-    id="address"
-    placeholder="Delivery address">
-
-  <button onclick="checkout()">
-    Place Order
-  </button>
-
-</div>
-
-
-<!-- LOGIN -->
-
-<div id="login" class="modal">
-
-  <div class="loginCard">
-
-    <div class="loginLogo">
-      B
-    </div>
-
-    <h2 id="loginTitle">
-      Byenext
-    </h2>
-
-    <p class="welcome" id="loginWelcome">
-      Welcome back! Please login to your account.
-    </p>
-
-
-    <div class="inputBox">
-
-      <span>✉</span>
-
-      <input
-        id="email"
-        placeholder="Email"
-        type="email">
-
-    </div>
-
-
-    <div class="inputBox">
-
-      <span>🔒</span>
-
-      <input
-        id="password"
-        type="password"
-        placeholder="Password">
-
-      <button
-        type="button"
-        class="eye"
-        onclick="togglePassword()">
-        👁
-      </button>
-
-    </div>
-
-
-    <div class="inputBox">
-
-      <span>👤</span>
-
-      <input
-        id="name"
-        placeholder="Name">
-
-    </div>
-
-
-    <button
-      class="loginButton"
-      onclick="login()">
-
-      Login <span>→</span>
-
-    </button>
-
-
-    <button
-      class="createButton"
-      onclick="signup()">
-
-      Create Customer Account
-
-    </button>
-
-
-    <button
-      class="sellerLoginBtn"
-      onclick="sellerMode()">
-
-      🏪 Create Seller Account
-
-    </button>
-
-
-    <p id="msg"></p>
-
-  </div>
-
-</div>
-
-
-<script>
-
-let token = localStorage.getItem("token");
-let role = localStorage.getItem("role");
-
-let cart = [];
-
-const $ = id =>
-  document.getElementById(id);
-
-
-/* API */
-
-async function api(url,opt={}){
-
-  opt.headers = {
-
-    ...(opt.headers || {}),
-
-    ...(token
-      ? {
-          Authorization:"Bearer "+token
-        }
-      : {})
-
+if (!Array.isArray(data.users)) data.users = [];
+if (!Array.isArray(data.products)) data.products = [];
+if (!Array.isArray(data.orders)) data.orders = [];
+
+const adminUser = data.users.find(u => u.role === "admin");
+
+if (adminUser) {
+  adminUser.email = "admin@byenext.com";
+  adminUser.password = "Ankush@2009";
+} else {
+  data.users.unshift({
+    id: 1,
+    name: "Admin",
+    email: "admin@byenext.com",
+    password: "Ankush@2009",
+    role: "admin"
+  });
+}
+
+data.products = data.products.map(p => ({
+  ...p,
+  sellerId: p.sellerId ?? null
+}));
+
+function saveData() {
+  fs.writeFileSync(DATA_FILE, JSON.stringify(data, null, 2));
+}
+
+const sessions = new Map();
+
+function makeToken() {
+  return crypto.randomBytes(32).toString("hex");
+}
+
+function safeUser(user) {
+  return {
+    id: user.id,
+    name: user.name,
+    email: user.email,
+    role: user.role
+  };
+}
+
+function auth(req, res, next) {
+  const header = req.headers.authorization || "";
+
+  const token = header.startsWith("Bearer ")
+    ? header.slice(7)
+    : null;
+
+  const userId = token ? sessions.get(token) : null;
+  const user = data.users.find(u => u.id === userId);
+
+  if (!user) {
+    return res.status(401).json({
+      error: "Login required"
+    });
+  }
+
+  req.user = user;
+  next();
+}
+
+function adminOnly(req, res, next) {
+  if (req.user.role !== "admin") {
+    return res.status(403).json({
+      error: "Admin access required"
+    });
+  }
+
+  next();
+}
+
+function sellerOnly(req, res, next) {
+  if (req.user.role !== "seller") {
+    return res.status(403).json({
+      error: "Seller access required"
+    });
+  }
+
+  next();
+}
+
+function adminOrSeller(req, res, next) {
+  if (
+    req.user.role !== "admin" &&
+    req.user.role !== "seller"
+  ) {
+    return res.status(403).json({
+      error: "Seller or admin access required"
+    });
+  }
+
+  next();
+}
+
+
+/* =========================
+   HEALTH
+========================= */
+
+app.get("/api/health", (req, res) => {
+  res.json({
+    ok: true,
+    app: "Byenext"
+  });
+});
+
+
+/* =========================
+   PRODUCTS
+========================= */
+
+app.get("/api/products", (req, res) => {
+  res.json(data.products);
+});
+
+
+/* =========================
+   CUSTOMER REGISTER
+========================= */
+
+app.post("/api/register", (req, res) => {
+  const { name, email, password } = req.body;
+
+  if (!name || !email || !password) {
+    return res.status(400).json({
+      error: "Name, email and password are required"
+    });
+  }
+
+  const cleanEmail = String(email).trim().toLowerCase();
+
+  if (
+    data.users.some(
+      u => u.email.toLowerCase() === cleanEmail
+    )
+  ) {
+    return res.status(400).json({
+      error: "Email already registered"
+    });
+  }
+
+  const user = {
+    id: Date.now(),
+    name: String(name).trim(),
+    email: cleanEmail,
+    password: String(password),
+    role: "customer"
   };
 
-  if(opt.body){
+  data.users.push(user);
+  saveData();
 
-    opt.headers["Content-Type"] =
-      "application/json";
+  const token = makeToken();
+  sessions.set(token, user.id);
 
-  }
-
-  let r = await fetch(url,opt);
-
-  let d;
-
-  try{
-    d = await r.json();
-  }catch(e){
-    d = {};
-  }
-
-  if(!r.ok){
-
-    throw Error(
-      d.error ||
-      "Something went wrong"
-    );
-
-  }
-
-  return d;
-
-}
-
-
-/* PAGE SWITCH */
-
-function show(id){
-
-  if(
-    id==="admin" &&
-    role!=="admin"
-  ){
-
-    alert("Admin login required");
-    return;
-
-  }
-
-
-  if(
-    id==="seller" &&
-    role!=="seller"
-  ){
-
-    alert("Seller login required");
-    return;
-
-  }
-
-
-  [
-    "shop",
-    "orders",
-    "seller",
-    "admin"
-  ].forEach(x=>{
-
-    $(x).classList.toggle(
-      "hidden",
-      x!==id
-    );
-
+  res.json({
+    token,
+    user: safeUser(user)
   });
+});
 
 
-  if(id==="orders"){
+/* =========================
+   SELLER REGISTER
+========================= */
 
-    loadOrders();
+app.post("/api/register-seller", (req, res) => {
+  const { name, email, password } = req.body;
 
+  if (!name || !email || !password) {
+    return res.status(400).json({
+      error: "Name, email and password are required"
+    });
   }
 
+  const cleanEmail = String(email).trim().toLowerCase();
 
-  if(id==="admin"){
-
-    loadAdmin();
-
+  if (
+    data.users.some(
+      u => u.email.toLowerCase() === cleanEmail
+    )
+  ) {
+    return res.status(400).json({
+      error: "Email already registered"
+    });
   }
 
+  const seller = {
+    id: Date.now(),
+    name: String(name).trim(),
+    email: cleanEmail,
+    password: String(password),
+    role: "seller"
+  };
 
-  if(id==="seller"){
+  data.users.push(seller);
+  saveData();
 
-    loadSeller();
+  const token = makeToken();
+  sessions.set(token, seller.id);
 
+  res.json({
+    token,
+    user: safeUser(seller)
+  });
+});
+
+
+/* =========================
+   LOGIN
+========================= */
+
+app.post("/api/login", (req, res) => {
+  const { email, password } = req.body;
+
+  const cleanEmail = String(email || "")
+    .trim()
+    .toLowerCase();
+
+  const user = data.users.find(
+    u =>
+      u.email.toLowerCase() === cleanEmail &&
+      u.password === password
+  );
+
+  if (!user) {
+    return res.status(401).json({
+      error: "Invalid email or password"
+    });
   }
 
-}
+  const token = makeToken();
+  sessions.set(token, user.id);
+
+  res.json({
+    token,
+    user: safeUser(user)
+  });
+});
 
 
-/* LOAD PRODUCTS */
+/* =========================
+   SELLER PRODUCTS
+========================= */
 
-async function load(){
-
-  try{
-
-    let ps =
-      await api("/api/products");
-
-
-    $("products").innerHTML =
-      ps.map(p=>`
-
-        <div class="product">
-
-          <img
-            src="${p.image || ""}"
-            alt="${p.name}">
-
-          <h3>
-            ${p.name}
-          </h3>
-
-          <p>
-            ${p.description || ""}
-          </p>
-
-          <b>
-            ₹${p.price}
-          </b>
-
-          <button
-            onclick="add(${p.id})">
-
-            Add to cart
-
-          </button>
-
-        </div>
-
-      `).join("");
-
-
-  }catch(e){
-
-    console.error(e);
-
+app.get(
+  "/api/seller/products",
+  auth,
+  sellerOnly,
+  (req, res) => {
+    res.json(
+      data.products.filter(
+        p => p.sellerId === req.user.id
+      )
+    );
   }
-
-}
-
-
-/* CART */
-
-async function add(id){
-
-  let ps =
-    await api("/api/products");
-
-  let p =
-    ps.find(x=>x.id===id);
+);
 
 
-  if(!p){
+app.post(
+  "/api/seller/products",
+  auth,
+  sellerOnly,
+  (req, res) => {
+    const {
+      name,
+      description,
+      price,
+      image,
+      stock
+    } = req.body;
 
-    alert("Product not found");
-
-    return;
-
-  }
-
-
-  if(
-    p.stock !== undefined &&
-    p.stock <= 0
-  ){
-
-    alert("Out of stock");
-
-    return;
-
-  }
-
-
-  let x =
-    cart.find(x=>x.id===id);
-
-
-  if(x){
-
-    if(
-      p.stock !== undefined &&
-      x.qty >= p.stock
-    ){
-
-      alert("Not enough stock");
-
-      return;
-
+    if (
+      !name ||
+      price === undefined ||
+      stock === undefined
+    ) {
+      return res.status(400).json({
+        error: "Name, price and stock are required"
+      });
     }
 
-    x.qty++;
+    const product = {
+      id: Date.now(),
+      name: String(name).trim(),
+      description: String(description || "").trim(),
+      price: Number(price),
+      image:
+        String(image || "").trim() ||
+        "https://via.placeholder.com/300x200?text=Byenext",
+      stock: Number(stock),
+      sellerId: req.user.id
+    };
 
-  }else{
+    if (
+      !Number.isFinite(product.price) ||
+      product.price < 0
+    ) {
+      return res.status(400).json({
+        error: "Invalid price"
+      });
+    }
 
-    cart.push({
+    if (
+      !Number.isInteger(product.stock) ||
+      product.stock < 0
+    ) {
+      return res.status(400).json({
+        error: "Invalid stock"
+      });
+    }
 
-      id:p.id,
+    data.products.push(product);
+    saveData();
 
-      qty:1,
+    res.json(product);
+  }
+);
 
-      name:p.name,
 
-      price:p.price
+app.put(
+  "/api/seller/products/:id",
+  auth,
+  sellerOnly,
+  (req, res) => {
+    const id = Number(req.params.id);
 
+    const product = data.products.find(
+      p =>
+        p.id === id &&
+        p.sellerId === req.user.id
+    );
+
+    if (!product) {
+      return res.status(404).json({
+        error: "Product not found"
+      });
+    }
+
+    const {
+      name,
+      description,
+      price,
+      image,
+      stock
+    } = req.body;
+
+    if (name !== undefined) {
+      product.name = String(name).trim();
+    }
+
+    if (description !== undefined) {
+      product.description =
+        String(description).trim();
+    }
+
+    if (price !== undefined) {
+      const newPrice = Number(price);
+
+      if (
+        !Number.isFinite(newPrice) ||
+        newPrice < 0
+      ) {
+        return res.status(400).json({
+          error: "Invalid price"
+        });
+      }
+
+      product.price = newPrice;
+    }
+
+    if (stock !== undefined) {
+      const newStock = Number(stock);
+
+      if (
+        !Number.isInteger(newStock) ||
+        newStock < 0
+      ) {
+        return res.status(400).json({
+          error: "Invalid stock"
+        });
+      }
+
+      product.stock = newStock;
+    }
+
+    if (image !== undefined) {
+      product.image = String(image).trim();
+    }
+
+    saveData();
+
+    res.json(product);
+  }
+);
+
+
+app.delete(
+  "/api/seller/products/:id",
+  auth,
+  sellerOnly,
+  (req, res) => {
+    const id = Number(req.params.id);
+
+    const index = data.products.findIndex(
+      p =>
+        p.id === id &&
+        p.sellerId === req.user.id
+    );
+
+    if (index === -1) {
+      return res.status(404).json({
+        error: "Product not found"
+      });
+    }
+
+    data.products.splice(index, 1);
+    saveData();
+
+    res.json({
+      ok: true
+    });
+  }
+);
+
+
+/* =========================
+   ADMIN PRODUCTS
+========================= */
+
+app.post(
+  "/api/admin/products",
+  auth,
+  adminOnly,
+  (req, res) => {
+    const {
+      name,
+      description,
+      price,
+      image,
+      stock
+    } = req.body;
+
+    if (
+      !name ||
+      price === undefined ||
+      stock === undefined
+    ) {
+      return res.status(400).json({
+        error: "Name, price and stock are required"
+      });
+    }
+
+    const product = {
+      id: Date.now(),
+      name: String(name).trim(),
+      description: String(description || "").trim(),
+      price: Number(price),
+      image:
+        String(image || "").trim() ||
+        "https://via.placeholder.com/300x200?text=Byenext",
+      stock: Number(stock),
+      sellerId: null
+    };
+
+    if (
+      !Number.isFinite(product.price) ||
+      product.price < 0
+    ) {
+      return res.status(400).json({
+        error: "Invalid price"
+      });
+    }
+
+    if (
+      !Number.isInteger(product.stock) ||
+      product.stock < 0
+    ) {
+      return res.status(400).json({
+        error: "Invalid stock"
+      });
+    }
+
+    data.products.push(product);
+    saveData();
+
+    res.json(product);
+  }
+);
+
+
+app.delete(
+  "/api/admin/products/:id",
+  auth,
+  adminOnly,
+  (req, res) => {
+    const id = Number(req.params.id);
+
+    const index = data.products.findIndex(
+      p => p.id === id
+    );
+
+    if (index === -1) {
+      return res.status(404).json({
+        error: "Product not found"
+      });
+    }
+
+    data.products.splice(index, 1);
+    saveData();
+
+    res.json({
+      ok: true
+    });
+  }
+);
+
+
+/* =========================
+   ORDERS
+========================= */
+
+app.get("/api/orders", auth, (req, res) => {
+
+  if (req.user.role === "admin") {
+    return res.json(data.orders);
+  }
+
+  if (req.user.role === "seller") {
+
+    const sellerOrders = data.orders
+      .map(order => {
+
+        const items = order.items.filter(
+          item =>
+            item.sellerId === req.user.id
+        );
+
+        if (items.length === 0) {
+          return null;
+        }
+
+        const sellerSubtotal =
+          items.reduce(
+            (sum, item) =>
+              sum + item.price * item.qty,
+            0
+          );
+
+        return {
+          ...order,
+          items,
+          sellerSubtotal
+        };
+      })
+      .filter(Boolean);
+
+    return res.json(sellerOrders);
+  }
+
+  res.json(
+    data.orders.filter(
+      order =>
+        order.userId === req.user.id
+    )
+  );
+});
+
+
+/* =========================
+   CREATE ORDER
+========================= */
+
+app.post("/api/orders", auth, (req, res) => {
+  const { items, address } = req.body;
+
+  if (
+    !Array.isArray(items) ||
+    items.length === 0
+  ) {
+    return res.status(400).json({
+      error: "Cart is empty"
+    });
+  }
+
+  if (!address) {
+    return res.status(400).json({
+      error: "Delivery address is required"
+    });
+  }
+
+  let subtotal = 0;
+  const orderItems = [];
+
+  for (const item of items) {
+
+    const product = data.products.find(
+      p => p.id === Number(item.id)
+    );
+
+    if (!product) {
+      return res.status(400).json({
+        error: "Product not found"
+      });
+    }
+
+    const qty = Number(item.qty);
+
+    if (
+      !Number.isInteger(qty) ||
+      qty < 1
+    ) {
+      return res.status(400).json({
+        error: "Invalid quantity"
+      });
+    }
+
+    if (product.stock < qty) {
+      return res.status(400).json({
+        error:
+          `${product.name} is out of stock`
+      });
+    }
+
+    subtotal += product.price * qty;
+
+    orderItems.push({
+      productId: product.id,
+      name: product.name,
+      price: product.price,
+      qty,
+      sellerId: product.sellerId ?? null
     });
 
+    product.stock -= qty;
   }
 
-
-  renderCart();
-
-}
-
-
-function renderCart(){
-
-  $("cartItems").innerHTML =
-    cart.map(x=>`
-
-      <div class="item">
-
-        <span>
-          ${x.name} × ${x.qty}
-        </span>
-
-        <b>
-          ₹${x.price*x.qty}
-        </b>
-
-      </div>
-
-    `).join("");
-
-
-  $("total").textContent =
-    cart.reduce(
-      (s,x)=>
-        s+(x.price*x.qty),
-      0
-    );
-
-}
-
-
-/* CHECKOUT */
-
-async function checkout(){
-
-  if(!token){
-
-    alert("Please login first");
-
-    return;
-
-  }
-
-
-  if(!cart.length){
-
-    alert("Cart is empty");
-
-    return;
-
-  }
-
-
-  if(
-    !$("address").value.trim()
-  ){
-
-    alert(
-      "Please enter delivery address"
-    );
-
-    return;
-
-  }
-
-
-  try{
-
-    let d =
-      await api("/api/orders",{
-
-        method:"POST",
-
-        body:JSON.stringify({
-
-          items:cart,
-
-          address:
-            $("address").value.trim()
-
-        })
-
-      });
-
-
-    alert(
-      "Order #"+
-      d.orderId+
-      " placed successfully."
-    );
-
-
-    cart=[];
-
-    renderCart();
-
-    $("address").value="";
-
-    show("orders");
-
-
-  }catch(e){
-
-    alert(e.message);
-
-  }
-
-}
-
-
-/* LOGIN */
-
-async function login(){
-
-  $("msg").textContent =
-    "Logging in...";
-
-
-  try{
-
-    let d =
-      await api("/api/login",{
-
-        method:"POST",
-
-        body:JSON.stringify({
-
-          email:
-            $("email").value.trim(),
-
-          password:
-            $("password").value
-
-        })
-
-      });
-
-
-    token =
-      d.token;
-
-    role =
-      d.user.role;
-
-
-    localStorage.setItem(
-      "token",
-      token
-    );
-
-    localStorage.setItem(
-      "role",
-      role
-    );
-
-
-    updateMenu();
-
-
-    $("login")
-      .classList.add("hidden");
-
-
-    $("msg").textContent="";
-
-
-    await load();
-
-
-    if(role==="seller"){
-
-      show("seller");
-
-    }else{
-
-      show("shop");
-
-    }
-
-
-  }catch(e){
-
-    $("msg").textContent =
-      e.message;
-
-  }
-
-}
-
-
-/* CUSTOMER SIGNUP */
-
-async function signup(){
-
-  $("msg").textContent =
-    "Creating account...";
-
-
-  try{
-
-    let d =
-      await api("/api/register",{
-
-        method:"POST",
-
-        body:JSON.stringify({
-
-          name:
-            $("name").value.trim(),
-
-          email:
-            $("email").value.trim(),
-
-          password:
-            $("password").value,
-
-          role:"customer"
-
-        })
-
-      });
-
-
-    token =
-      d.token;
-
-    role =
-      d.user.role;
-
-
-    localStorage.setItem(
-      "token",
-      token
-    );
-
-    localStorage.setItem(
-      "role",
-      role
-    );
-
-
-    updateMenu();
-
-
-    $("login")
-      .classList.add("hidden");
-
-
-    $("msg").textContent="";
-
-
-    await load();
-
-    show("shop");
-
-
-  }catch(e){
-
-    $("msg").textContent =
-      e.message;
-
-  }
-
-}
-
-
-/* SELLER MODE */
-
-function sellerMode(){
-
-  $("loginTitle").textContent =
-    "Byenext Seller";
-
-  $("loginWelcome").textContent =
-    "Create your seller account.";
-
-  $("name").placeholder =
-    "Seller Name";
-
-  $("msg").textContent =
-    "Seller registration mode";
-
-
-  let buttons =
-    document.querySelectorAll(
-      ".loginCard button"
-    );
-
-
-  if(buttons.length >= 3){
-
-    buttons[0].textContent =
-      "Seller Login →";
-
-    buttons[0].onclick =
-      login;
-
-    buttons[1].textContent =
-      "Create Seller Account";
-
-    buttons[1].onclick =
-      signupSeller;
-
-    buttons[2].style.display =
-      "none";
-
-  }
-
-}
-
-
-/* SELLER SIGNUP */
-
-async function signupSeller(){
-
-  $("msg").textContent =
-    "Creating seller account...";
-
-
-  try{
-
-    let d =
-      await api(
-        "/api/register-seller",
-        {
-
-          method:"POST",
-
-          body:JSON.stringify({
-
-            name:
-              $("name").value.trim(),
-
-            email:
-              $("email").value.trim(),
-
-            password:
-              $("password").value
-
-          })
-
-        }
-      );
-
-
-    token =
-      d.token;
-
-    role =
-      d.user.role;
-
-
-    localStorage.setItem(
-      "token",
-      token
-    );
-
-    localStorage.setItem(
-      "role",
-      role
-    );
-
-
-    updateMenu();
-
-
-    $("login")
-      .classList.add("hidden");
-
-
-    $("msg").textContent="";
-
-
-    await load();
-
-    show("seller");
-
-
-  }catch(e){
-
-    $("msg").textContent =
-      e.message;
-
-  }
-
-}
-
-
-/* MENU */
-
-function updateMenu(){
-
-  $("adminBtn").style.display =
-    role==="admin"
-      ? "inline-block"
-      : "none";
-
-
-  $("sellerBtn").style.display =
-    role==="seller"
-      ? "inline-block"
-      : "none";
-
-}
-
-
-/* PASSWORD */
-
-function togglePassword(){
-
-  let input =
-    $("password");
-
-
-  if(
-    input.type==="password"
-  ){
-
-    input.type="text";
-
-  }else{
-
-    input.type="password";
-
-  }
-
-}
-
-
-/* LOGOUT */
-
-function logout(){
-
-  localStorage.removeItem(
-    "token"
-  );
-
-  localStorage.removeItem(
-    "role"
-  );
-
-
-  token=null;
-
-  role=null;
-
-  cart=[];
-
-
-  location.reload();
-
-}
-
-
-/* CUSTOMER ORDERS */
-
-async function loadOrders(){
-
-  try{
-
-    let os =
-      await api("/api/orders");
-
-
-    $("orderList").innerHTML =
-      os.length
-
-      ?
-
-      os.map(o=>`
-
-        <div class="order">
-
-          <b>
-            Order #${o.id}
-          </b>
-
-          <br>
-
-          Total ₹${o.total}
-
-          <br>
-
-          Status:
-          <b>
-            ${o.status}
-          </b>
-
-          <br>
-
-          ${o.address || ""}
-
-        </div>
-
-      `).join("")
-
-      :
-
-      "No orders yet";
-
-
-  }catch(e){
-
-    $("orderList").textContent =
-      e.message;
-
-  }
-
-}
-
-
-/* SELLER DASHBOARD */
-
-async function loadSeller(){
-
-  if(role!=="seller"){
-
-    $("sellerProducts").textContent =
-      "Seller login required";
-
-    return;
-
-  }
-
-
-  try{
-
-    let products =
-      await api(
-        "/api/seller/products"
-      );
-
-
-    let orders =
-      await api(
-        "/api/orders"
-      );
-
-
-    /* PRODUCTS */
-
-    $("sellerProducts").innerHTML =
-      products.length
-
-      ?
-
-      products.map(p=>`
-
-        <div class="sellerProduct">
-
-          <b>
-            ${p.name}
-          </b>
-
-          <br>
-
-          ₹${p.price}
-
-          <br>
-
-          Stock:
-          ${p.stock}
-
-          <br>
-
-          <small>
-            ${p.description || ""}
-          </small>
-
-          <br>
-
-          <button
-            onclick="editSellerProduct(${p.id})">
-
-            ✏ Edit
-
-          </button>
-
-          <button
-            class="danger"
-            onclick="deleteSellerProduct(${p.id})">
-
-            🗑 Delete
-
-          </button>
-
-        </div>
-
-      `).join("")
-
-      :
-
-      "No products yet.";
-
-
-    /* ORDERS */
-
-    $("sellerOrders").innerHTML =
-      orders.length
-
-      ?
-
-      orders.map(o=>`
-
-        <div class="sellerProduct">
-
-          <b>
-            Order #${o.id}
-          </b>
-
-          <br>
-
-          Seller subtotal:
-          ₹${o.sellerSubtotal || 0}
-
-          <br>
-
-          Status:
-          <b>
-            ${o.status}
-          </b>
-
-          <br>
-
-          ${
-            (o.items || [])
-              .map(i=>
-                `${i.name} × ${i.qty}`
-              )
-              .join("<br>")
-          }
-
-        </div>
-
-      `).join("")
-
-      :
-
-      "No seller orders yet.";
-
-
-  }catch(e){
-
-    $("sellerProducts").textContent =
-      e.message;
-
-    $("sellerOrders").textContent =
-      e.message;
-
-  }
-
-}
-
-
-/* ADD SELLER PRODUCT */
-
-async function addSellerProduct(){
-
-  try{
-
-    let name =
-      $("sellerName").value.trim();
-
-    let description =
-      $("sellerDescription")
-        .value.trim();
-
-    let price =
-      Number(
-        $("sellerPrice").value
-      );
-
-    let stock =
-      Number(
-        $("sellerStock").value
-      );
-
-    let image =
-      $("sellerImage").value.trim();
-
-
-    if(!name){
-
-      alert(
-        "Enter product name"
-      );
-
-      return;
-
-    }
-
-
-    if(
-      !Number.isFinite(price) ||
-      price < 0
-    ){
-
-      alert("Enter valid price");
-
-      return;
-
-    }
-
-
-    if(
-      !Number.isInteger(stock) ||
-      stock < 0
-    ){
-
-      alert("Enter valid stock");
-
-      return;
-
-    }
-
-
-    await api(
-      "/api/seller/products",
-      {
-
-        method:"POST",
-
-        body:JSON.stringify({
-
-          name:name,
-
-          description:description,
-
-          price:price,
-
-          stock:stock,
-
-          image:image
-
-        })
-
-      }
-    );
-
-
-    alert(
-      "Product added successfully"
-    );
-
-
-    $("sellerName").value="";
-
-    $("sellerDescription").value="";
-
-    $("sellerPrice").value="";
-
-    $("sellerStock").value="";
-
-    $("sellerImage").value="";
-
-
-    loadSeller();
-
-    load();
-
-
-  }catch(e){
-
-    alert(e.message);
-
-  }
-
-}
-
-
-/* EDIT SELLER PRODUCT */
-
-async function editSellerProduct(id){
-
-  let name =
-    prompt(
-      "New product name:"
-    );
-
-
-  if(name===null){
-
-    return;
-
-  }
-
-
-  let price =
-    prompt(
-      "New price:"
-    );
-
-
-  if(price===null){
-
-    return;
-
-  }
-
-
-  let stock =
-    prompt(
-      "New stock:"
-    );
-
-
-  if(stock===null){
-
-    return;
-
-  }
-
-
-  try{
-
-    await api(
-      "/api/seller/products/"+id,
-      {
-
-        method:"PUT",
-
-        body:JSON.stringify({
-
-          name:name,
-
-          price:Number(price),
-
-          stock:Number(stock)
-
-        })
-
-      }
-    );
-
-
-    alert(
-      "Product updated"
-    );
-
-
-    loadSeller();
-
-    load();
-
-
-  }catch(e){
-
-    alert(e.message);
-
-  }
-
-}
-
-
-/* DELETE SELLER PRODUCT */
-
-async function deleteSellerProduct(id){
-
-  if(
-    !confirm(
-      "Delete this product?"
-    )
-  ){
-
-    return;
-
-  }
-
-
-  try{
-
-    await api(
-      "/api/seller/products/"+id,
-      {
-
-        method:"DELETE"
-
-      }
-    );
-
-
-    alert(
-      "Product deleted"
-    );
-
-
-    loadSeller();
-
-    load();
-
-
-  }catch(e){
-
-    alert(e.message);
-
-  }
-
-}
-
-
-/* ADMIN */
-
-async function loadAdmin(){
-
-  if(role!=="admin"){
-
-    $("adminBox").textContent =
-      "Admin login required";
-
-    return;
-
-  }
-
-
-  try{
-
-    let os =
-      await api("/api/orders");
-
-    let ps =
-      await api("/api/products");
-
-
-    $("adminBox").innerHTML = `
-
-      <h3>
-        Orders (${os.length})
-      </h3>
-
-
-      ${
-        os.length
-
-        ?
-
-        os.map(o=>`
-
-          <div class="order">
-
-            <b>
-              Order #${o.id}
-            </b>
-
-            <br>
-
-            ₹${o.total}
-
-            <br>
-
-            Status:
-            ${o.status}
-
-            <select
-              onchange="changeStatus(
-                ${o.id},
-                this.value
-              )">
-
-              <option value="Pending"
-                ${o.status==="Pending"
-                  ?"selected":""
-                }>
-
-                Pending
-
-              </option>
-
-              <option value="Confirmed"
-                ${o.status==="Confirmed"
-                  ?"selected":""
-                }>
-
-                Confirmed
-
-              </option>
-
-              <option value="Shipped"
-                ${o.status==="Shipped"
-                  ?"selected":""
-                }>
-
-                Shipped
-
-              </option>
-
-              <option value="Delivered"
-                ${o.status==="Delivered"
-                  ?"selected":""
-                }>
-
-                Delivered
-
-              </option>
-
-              <option value="Cancelled"
-                ${o.status==="Cancelled"
-                  ?"selected":""
-                }>
-
-                Cancelled
-
-              </option>
-
-            </select>
-
-          </div>
-
-        `).join("")
-
-        :
-
-        "No orders yet"
-
-      }
-
-
-      <h3>
-        Add Product
-      </h3>
-
-
-      <input
-        id="n"
-        placeholder="Name">
-
-
-      <input
-        id="pr"
-        type="number"
-        placeholder="Price">
-
-
-      <input
-        id="im"
-        placeholder="Image URL">
-
-
-      <input
-        id="st"
-        type="number"
-        placeholder="Stock">
-
-
-      <button
-        onclick="addProduct()">
-
-        Add Product
-
-      </button>
-
-
-      <h3>
-        Products
-      </h3>
-
-
-      ${
-        ps.map(p=>`
-
-          <div class="item">
-
-            ${p.name}
-            ₹${p.price}
-
-            <button
-              onclick="del(${p.id})">
-
-              Delete
-
-            </button>
-
-          </div>
-
-        `).join("")
-      }
-
-    `;
-
-
-  }catch(e){
-
-    $("adminBox").textContent =
-      e.message;
-
-  }
-
-}
-
-
-/* ADMIN ORDER STATUS */
-
-async function changeStatus(
-  id,
-  status
-){
-
-  try{
-
-    await api(
-      "/api/orders/"+id,
-      {
-
-        method:"PUT",
-
-        body:JSON.stringify({
-
-          status:status
-
-        })
-
-      }
-    );
-
-
-    loadAdmin();
-
-
-  }catch(e){
-
-    alert(e.message);
-
-  }
-
-}
-
-
-/* ADMIN ADD PRODUCT */
-
-async function addProduct(){
-
-  try{
-
-    await api(
-      "/api/admin/products",
-      {
-
-        method:"POST",
-
-        body:JSON.stringify({
-
-          name:
-            $("n").value,
-
-          price:
-            Number(
-              $("pr").value
-            ),
-
-          image:
-            $("im").value,
-
-          description:
-            "Byenext product",
-
-          stock:
-            Number(
-              $("st").value
+  const serviceFee =
+    Math.round(
+      subtotal * 0.01 * 100
+    ) / 100;
+
+  const total =
+    Math.round(
+      (subtotal + serviceFee) * 100
+    ) / 100;
+
+  const order = {
+    id:
+      data.orders.length
+        ? Math.max(
+            ...data.orders.map(
+              o => o.id
             )
+          ) + 1
+        : 1,
 
-        })
+    userId: req.user.id,
 
-      }
+    customer: req.user.name,
+
+    items: orderItems,
+
+    address,
+
+    subtotal,
+
+    serviceFee,
+
+    total,
+
+    status: "Pending",
+
+    createdAt:
+      new Date().toISOString()
+  };
+
+  data.orders.push(order);
+
+  saveData();
+
+  res.json({
+    orderId: order.id,
+    serviceFee,
+    total
+  });
+});
+
+
+/* =========================
+   UPDATE ORDER STATUS
+========================= */
+
+app.put(
+  "/api/orders/:id",
+  auth,
+  adminOnly,
+  (req, res) => {
+
+    const id = Number(req.params.id);
+
+    const order = data.orders.find(
+      o => o.id === id
     );
 
+    if (!order) {
+      return res.status(404).json({
+        error: "Order not found"
+      });
+    }
 
-    alert(
-      "Product added"
-    );
+    const { status } = req.body;
 
+    if (!status) {
+      return res.status(400).json({
+        error: "Status is required"
+      });
+    }
 
-    loadAdmin();
+    order.status = status;
 
-    load();
+    saveData();
 
-
-  }catch(e){
-
-    alert(e.message);
-
+    res.json(order);
   }
-
-}
-
-
-/* ADMIN DELETE */
-
-async function del(id){
-
-  try{
-
-    await api(
-      "/api/admin/products/"+id,
-      {
-
-        method:"DELETE"
-
-      }
-    );
+);
 
 
-    loadAdmin();
+/* =========================
+   STATIC WEBSITE
+========================= */
 
-    load();
-
-
-  }catch(e){
-
-    alert(e.message);
-
-  }
-
-}
+app.use(
+  express.static(
+    path.join(__dirname)
+  )
+);
 
 
-/* START */
+/* =========================
+   START SERVER
+========================= */
 
-if(token){
-
-  $("login")
-    .classList.add("hidden");
-
-  updateMenu();
-
-  load();
-
-}else{
-
-  $("login")
-    .classList.remove("hidden");
-
-  $("adminBtn")
-    .style.display="none";
-
-  $("sellerBtn")
-    .style.display="none";
-
-}
-
-
-renderCart();
-
-</script>
-
-</body>
-</html>
+app.listen(PORT, () => {
+  console.log(
+    `Byenext running on port ${PORT}`
+  );
+});
