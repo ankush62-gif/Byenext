@@ -4,7 +4,94 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Byenext</title>
+
 <link rel="stylesheet" href="/style.css">
+
+<style>
+.sellerBox{
+  background:white;
+  padding:25px;
+  border-radius:18px;
+  box-shadow:0 8px 30px rgba(0,0,0,.08);
+  margin-top:20px;
+}
+
+.sellerGrid{
+  display:grid;
+  grid-template-columns:repeat(2,1fr);
+  gap:20px;
+}
+
+.sellerCard{
+  background:#f8fafc;
+  padding:20px;
+  border-radius:14px;
+  border:1px solid #e5e7eb;
+}
+
+.sellerCard input,
+.sellerCard textarea{
+  width:100%;
+  padding:12px;
+  margin:7px 0;
+  border:1px solid #d1d5db;
+  border-radius:9px;
+  box-sizing:border-box;
+}
+
+.sellerCard textarea{
+  min-height:80px;
+  resize:vertical;
+}
+
+.sellerProduct{
+  background:white;
+  border:1px solid #e5e7eb;
+  padding:15px;
+  margin:10px 0;
+  border-radius:12px;
+}
+
+.sellerProduct button{
+  margin:5px 5px 0 0;
+}
+
+.sellerTitle{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:10px;
+  flex-wrap:wrap;
+}
+
+.sellerBadge{
+  background:#ede9fe;
+  color:#6d28d9;
+  padding:7px 12px;
+  border-radius:20px;
+  font-weight:bold;
+}
+
+.sellerLoginBtn{
+  background:linear-gradient(135deg,#2563eb,#7c3aed);
+  color:white;
+}
+
+.danger{
+  background:#dc2626 !important;
+}
+
+.secondary{
+  background:#374151 !important;
+}
+
+@media(max-width:700px){
+  .sellerGrid{
+    grid-template-columns:1fr;
+  }
+}
+</style>
+
 </head>
 
 <body>
@@ -17,10 +104,33 @@
   </div>
 
   <nav>
-    <button onclick="show('shop')">🛒 Shop</button>
-    <button onclick="show('orders')">🛍 My Orders</button>
-    <button id="adminBtn" style="display:none" onclick="show('admin')">⚙ Admin</button>
-    <button onclick="logout()">↪ Logout</button>
+
+    <button onclick="show('shop')">
+      🛒 Shop
+    </button>
+
+    <button onclick="show('orders')">
+      🛍 My Orders
+    </button>
+
+    <button
+      id="sellerBtn"
+      style="display:none"
+      onclick="show('seller')">
+      🏪 Seller
+    </button>
+
+    <button
+      id="adminBtn"
+      style="display:none"
+      onclick="show('admin')">
+      ⚙ Admin
+    </button>
+
+    <button onclick="logout()">
+      ↪ Logout
+    </button>
+
   </nav>
 
 </header>
@@ -48,7 +158,9 @@
           <div class="featureIcon">⚡</div>
           <div>
             <b>Fast & Easy Ordering</b>
-            <p>Order your favorite products in just a few clicks.</p>
+            <p>
+              Order your favorite products in just a few clicks.
+            </p>
           </div>
         </div>
 
@@ -56,7 +168,9 @@
           <div class="featureIcon">🛡</div>
           <div>
             <b>Secure Payments</b>
-            <p>Your transactions are safe and protected.</p>
+            <p>
+              Your transactions are safe and protected.
+            </p>
           </div>
         </div>
 
@@ -64,7 +178,9 @@
           <div class="featureIcon">🚚</div>
           <div>
             <b>Fast Delivery</b>
-            <p>Get your orders delivered to your doorstep.</p>
+            <p>
+              Get your orders delivered to your doorstep.
+            </p>
           </div>
         </div>
 
@@ -81,7 +197,9 @@
   </div>
 
 
-  <h2 class="shopTitle">Our Products</h2>
+  <h2 class="shopTitle">
+    Our Products
+  </h2>
 
   <div id="products" class="grid"></div>
 
@@ -93,6 +211,87 @@
   <h2>My Orders</h2>
 
   <div id="orderList"></div>
+
+</section>
+
+
+<section id="seller" class="hidden">
+
+  <div class="sellerBox">
+
+    <div class="sellerTitle">
+
+      <div>
+        <h2>🏪 Seller Dashboard</h2>
+        <p class="muted">
+          Manage your products and seller orders.
+        </p>
+      </div>
+
+      <span class="sellerBadge">
+        SELLER
+      </span>
+
+    </div>
+
+
+    <div class="sellerGrid">
+
+      <div class="sellerCard">
+
+        <h3>➕ Add Product</h3>
+
+        <input
+          id="sellerName"
+          placeholder="Product name">
+
+        <textarea
+          id="sellerDescription"
+          placeholder="Product description"></textarea>
+
+        <input
+          id="sellerPrice"
+          type="number"
+          placeholder="Price">
+
+        <input
+          id="sellerStock"
+          type="number"
+          placeholder="Stock">
+
+        <input
+          id="sellerImage"
+          placeholder="Image URL">
+
+        <button onclick="addSellerProduct()">
+          Add Product
+        </button>
+
+      </div>
+
+
+      <div class="sellerCard">
+
+        <h3>📦 Seller Orders</h3>
+
+        <div id="sellerOrders">
+          Loading...
+        </div>
+
+      </div>
+
+    </div>
+
+
+    <h3>
+      📦 My Products
+    </h3>
+
+    <div id="sellerProducts">
+      Loading...
+    </div>
+
+  </div>
 
 </section>
 
@@ -114,12 +313,13 @@
 
   <div id="cartItems"></div>
 
-  <b>Total: ₹<span id="total">0</span></b>
+  <b>
+    Total: ₹<span id="total">0</span>
+  </b>
 
   <input
     id="address"
-    placeholder="Delivery address"
-  >
+    placeholder="Delivery address">
 
   <button onclick="checkout()">
     Place Order
@@ -134,60 +334,87 @@
 
   <div class="loginCard">
 
-    <div class="loginLogo">B</div>
+    <div class="loginLogo">
+      B
+    </div>
 
-    <h2>Byenext</h2>
+    <h2 id="loginTitle">
+      Byenext
+    </h2>
 
-    <p class="welcome">
+    <p class="welcome" id="loginWelcome">
       Welcome back! Please login to your account.
     </p>
 
+
     <div class="inputBox">
+
       <span>✉</span>
+
       <input
         id="email"
         placeholder="Email"
-        type="email"
-      >
+        type="email">
+
     </div>
 
+
     <div class="inputBox">
+
       <span>🔒</span>
+
       <input
         id="password"
         type="password"
-        placeholder="Password"
-      >
+        placeholder="Password">
+
       <button
         type="button"
         class="eye"
-        onclick="togglePassword()"
-      >
+        onclick="togglePassword()">
         👁
       </button>
+
     </div>
 
+
     <div class="inputBox">
+
       <span>👤</span>
+
       <input
         id="name"
-        placeholder="Name (for signup)"
-      >
+        placeholder="Name">
+
     </div>
+
 
     <button
       class="loginButton"
-      onclick="login()"
-    >
+      onclick="login()">
+
       Login <span>→</span>
+
     </button>
+
 
     <button
       class="createButton"
-      onclick="signup()"
-    >
-      Create account
+      onclick="signup()">
+
+      Create Customer Account
+
     </button>
+
+
+    <button
+      class="sellerLoginBtn"
+      onclick="sellerMode()">
+
+      🏪 Create Seller Account
+
+    </button>
+
 
     <p id="msg"></p>
 
@@ -200,85 +427,166 @@
 
 let token = localStorage.getItem("token");
 let role = localStorage.getItem("role");
+
 let cart = [];
 
-const $ = id => document.getElementById(id);
+const $ = id =>
+  document.getElementById(id);
 
+
+/* API */
 
 async function api(url,opt={}){
 
   opt.headers = {
+
     ...(opt.headers || {}),
-    ...(token ? {
-      Authorization:"Bearer "+token
-    } : {})
+
+    ...(token
+      ? {
+          Authorization:"Bearer "+token
+        }
+      : {})
+
   };
 
   if(opt.body){
-    opt.headers["Content-Type"]="application/json";
+
+    opt.headers["Content-Type"] =
+      "application/json";
+
   }
 
   let r = await fetch(url,opt);
-  let d = await r.json();
+
+  let d;
+
+  try{
+    d = await r.json();
+  }catch(e){
+    d = {};
+  }
 
   if(!r.ok){
-    throw Error(d.error || "Something went wrong");
+
+    throw Error(
+      d.error ||
+      "Something went wrong"
+    );
+
   }
 
   return d;
+
 }
 
+
+/* PAGE SWITCH */
 
 function show(id){
 
-  if(id==="admin" && role!=="admin"){
+  if(
+    id==="admin" &&
+    role!=="admin"
+  ){
+
     alert("Admin login required");
     return;
+
   }
 
-  ["shop","orders","admin"].forEach(x=>{
-    $(x).classList.toggle("hidden",x!==id);
+
+  if(
+    id==="seller" &&
+    role!=="seller"
+  ){
+
+    alert("Seller login required");
+    return;
+
+  }
+
+
+  [
+    "shop",
+    "orders",
+    "seller",
+    "admin"
+  ].forEach(x=>{
+
+    $(x).classList.toggle(
+      "hidden",
+      x!==id
+    );
+
   });
 
+
   if(id==="orders"){
+
     loadOrders();
+
   }
 
+
   if(id==="admin"){
+
     loadAdmin();
+
+  }
+
+
+  if(id==="seller"){
+
+    loadSeller();
+
   }
 
 }
 
+
+/* LOAD PRODUCTS */
 
 async function load(){
 
   try{
 
-    let ps = await api("/api/products");
+    let ps =
+      await api("/api/products");
 
-    $("products").innerHTML = ps.map(p=>`
 
-      <div class="product">
+    $("products").innerHTML =
+      ps.map(p=>`
 
-        <img
-          src="${p.image || ""}"
-          alt="${p.name}"
-        >
+        <div class="product">
 
-        <h3>${p.name}</h3>
+          <img
+            src="${p.image || ""}"
+            alt="${p.name}">
 
-        <p>${p.description || ""}</p>
+          <h3>
+            ${p.name}
+          </h3>
 
-        <b>₹${p.price}</b>
+          <p>
+            ${p.description || ""}
+          </p>
 
-        <button onclick="add(${p.id})">
-          Add to cart
-        </button>
+          <b>
+            ₹${p.price}
+          </b>
 
-      </div>
+          <button
+            onclick="add(${p.id})">
 
-    `).join("");
+            Add to cart
+
+          </button>
+
+        </div>
+
+      `).join("");
+
 
   }catch(e){
 
@@ -289,31 +597,73 @@ async function load(){
 }
 
 
+/* CART */
+
 async function add(id){
 
-  let ps = await api("/api/products");
+  let ps =
+    await api("/api/products");
 
-  let p = ps.find(x=>x.id===id);
+  let p =
+    ps.find(x=>x.id===id);
+
 
   if(!p){
+
     alert("Product not found");
+
     return;
+
   }
 
-  let x = cart.find(x=>x.id===id);
+
+  if(
+    p.stock !== undefined &&
+    p.stock <= 0
+  ){
+
+    alert("Out of stock");
+
+    return;
+
+  }
+
+
+  let x =
+    cart.find(x=>x.id===id);
+
 
   if(x){
+
+    if(
+      p.stock !== undefined &&
+      x.qty >= p.stock
+    ){
+
+      alert("Not enough stock");
+
+      return;
+
+    }
+
     x.qty++;
+
   }else{
 
     cart.push({
+
       id:p.id,
+
       qty:1,
+
       name:p.name,
+
       price:p.price
+
     });
 
   }
+
 
   renderCart();
 
@@ -322,63 +672,103 @@ async function add(id){
 
 function renderCart(){
 
-  $("cartItems").innerHTML = cart.map(x=>`
+  $("cartItems").innerHTML =
+    cart.map(x=>`
 
-    <div class="item">
+      <div class="item">
 
-      <span>
-        ${x.name} × ${x.qty}
-      </span>
+        <span>
+          ${x.name} × ${x.qty}
+        </span>
 
-      <b>
-        ₹${x.price*x.qty}
-      </b>
+        <b>
+          ₹${x.price*x.qty}
+        </b>
 
-    </div>
+      </div>
 
-  `).join("");
+    `).join("");
+
 
   $("total").textContent =
     cart.reduce(
-      (s,x)=>s+(x.price*x.qty),
+      (s,x)=>
+        s+(x.price*x.qty),
       0
     );
 
 }
 
 
+/* CHECKOUT */
+
 async function checkout(){
 
   if(!token){
+
     alert("Please login first");
+
     return;
+
   }
 
+
   if(!cart.length){
+
     alert("Cart is empty");
+
     return;
+
   }
+
+
+  if(
+    !$("address").value.trim()
+  ){
+
+    alert(
+      "Please enter delivery address"
+    );
+
+    return;
+
+  }
+
 
   try{
 
-    let d = await api("/api/orders",{
-      method:"POST",
-      body:JSON.stringify({
-        items:cart,
-        address:$("address").value
-      })
-    });
+    let d =
+      await api("/api/orders",{
+
+        method:"POST",
+
+        body:JSON.stringify({
+
+          items:cart,
+
+          address:
+            $("address").value.trim()
+
+        })
+
+      });
+
 
     alert(
-      "Order #"+d.orderId+
+      "Order #"+
+      d.orderId+
       " placed successfully."
     );
+
 
     cart=[];
 
     renderCart();
 
+    $("address").value="";
+
     show("orders");
+
 
   }catch(e){
 
@@ -389,123 +779,372 @@ async function checkout(){
 }
 
 
+/* LOGIN */
+
 async function login(){
 
-  $("msg").textContent="Logging in...";
+  $("msg").textContent =
+    "Logging in...";
+
 
   try{
 
-    let d = await api("/api/login",{
-      method:"POST",
-      body:JSON.stringify({
-        email:$("email").value.trim(),
-        password:$("password").value
-      })
-    });
+    let d =
+      await api("/api/login",{
 
-    token=d.token;
-    role=d.user.role;
+        method:"POST",
 
-    localStorage.setItem("token",token);
-    localStorage.setItem("role",role);
+        body:JSON.stringify({
 
-    $("adminBtn").style.display =
-      role==="admin" ? "inline-block" : "none";
+          email:
+            $("email").value.trim(),
 
-    $("login").classList.add("hidden");
+          password:
+            $("password").value
+
+        })
+
+      });
+
+
+    token =
+      d.token;
+
+    role =
+      d.user.role;
+
+
+    localStorage.setItem(
+      "token",
+      token
+    );
+
+    localStorage.setItem(
+      "role",
+      role
+    );
+
+
+    updateMenu();
+
+
+    $("login")
+      .classList.add("hidden");
+
 
     $("msg").textContent="";
 
+
     await load();
+
+
+    if(role==="seller"){
+
+      show("seller");
+
+    }else{
+
+      show("shop");
+
+    }
+
 
   }catch(e){
 
-    $("msg").textContent=e.message;
+    $("msg").textContent =
+      e.message;
 
   }
 
 }
 
+
+/* CUSTOMER SIGNUP */
 
 async function signup(){
 
-  $("msg").textContent="Creating account...";
+  $("msg").textContent =
+    "Creating account...";
+
 
   try{
 
-    let d = await api("/api/register",{
-      method:"POST",
-      body:JSON.stringify({
-        name:$("name").value.trim(),
-        email:$("email").value.trim(),
-        password:$("password").value
-      })
-    });
+    let d =
+      await api("/api/register",{
 
-    token=d.token;
-    role=d.user.role;
+        method:"POST",
 
-    localStorage.setItem("token",token);
-    localStorage.setItem("role",role);
+        body:JSON.stringify({
 
-    $("adminBtn").style.display =
-      role==="admin" ? "inline-block" : "none";
+          name:
+            $("name").value.trim(),
 
-    $("login").classList.add("hidden");
+          email:
+            $("email").value.trim(),
+
+          password:
+            $("password").value,
+
+          role:"customer"
+
+        })
+
+      });
+
+
+    token =
+      d.token;
+
+    role =
+      d.user.role;
+
+
+    localStorage.setItem(
+      "token",
+      token
+    );
+
+    localStorage.setItem(
+      "role",
+      role
+    );
+
+
+    updateMenu();
+
+
+    $("login")
+      .classList.add("hidden");
+
 
     $("msg").textContent="";
 
+
     await load();
+
+    show("shop");
+
 
   }catch(e){
 
-    $("msg").textContent=e.message;
+    $("msg").textContent =
+      e.message;
 
   }
 
 }
 
+
+/* SELLER MODE */
+
+function sellerMode(){
+
+  $("loginTitle").textContent =
+    "Byenext Seller";
+
+  $("loginWelcome").textContent =
+    "Create your seller account.";
+
+  $("name").placeholder =
+    "Seller Name";
+
+  $("msg").textContent =
+    "Seller registration mode";
+
+
+  let buttons =
+    document.querySelectorAll(
+      ".loginCard button"
+    );
+
+
+  if(buttons.length >= 3){
+
+    buttons[0].textContent =
+      "Seller Login →";
+
+    buttons[0].onclick =
+      login;
+
+    buttons[1].textContent =
+      "Create Seller Account";
+
+    buttons[1].onclick =
+      signupSeller;
+
+    buttons[2].style.display =
+      "none";
+
+  }
+
+}
+
+
+/* SELLER SIGNUP */
+
+async function signupSeller(){
+
+  $("msg").textContent =
+    "Creating seller account...";
+
+
+  try{
+
+    let d =
+      await api(
+        "/api/register-seller",
+        {
+
+          method:"POST",
+
+          body:JSON.stringify({
+
+            name:
+              $("name").value.trim(),
+
+            email:
+              $("email").value.trim(),
+
+            password:
+              $("password").value
+
+          })
+
+        }
+      );
+
+
+    token =
+      d.token;
+
+    role =
+      d.user.role;
+
+
+    localStorage.setItem(
+      "token",
+      token
+    );
+
+    localStorage.setItem(
+      "role",
+      role
+    );
+
+
+    updateMenu();
+
+
+    $("login")
+      .classList.add("hidden");
+
+
+    $("msg").textContent="";
+
+
+    await load();
+
+    show("seller");
+
+
+  }catch(e){
+
+    $("msg").textContent =
+      e.message;
+
+  }
+
+}
+
+
+/* MENU */
+
+function updateMenu(){
+
+  $("adminBtn").style.display =
+    role==="admin"
+      ? "inline-block"
+      : "none";
+
+
+  $("sellerBtn").style.display =
+    role==="seller"
+      ? "inline-block"
+      : "none";
+
+}
+
+
+/* PASSWORD */
 
 function togglePassword(){
 
-  let input = $("password");
+  let input =
+    $("password");
 
-  if(input.type==="password"){
+
+  if(
+    input.type==="password"
+  ){
+
     input.type="text";
+
   }else{
+
     input.type="password";
+
   }
 
 }
 
 
+/* LOGOUT */
+
 function logout(){
 
-  localStorage.removeItem("token");
-  localStorage.removeItem("role");
+  localStorage.removeItem(
+    "token"
+  );
+
+  localStorage.removeItem(
+    "role"
+  );
+
 
   token=null;
+
   role=null;
+
   cart=[];
+
 
   location.reload();
 
 }
 
 
+/* CUSTOMER ORDERS */
+
 async function loadOrders(){
 
   try{
 
-    let os = await api("/api/orders");
+    let os =
+      await api("/api/orders");
 
-    $("orderList").innerHTML = os.length ?
+
+    $("orderList").innerHTML =
+      os.length
+
+      ?
 
       os.map(o=>`
 
         <div class="order">
 
-          <b>Order #${o.id}</b>
+          <b>
+            Order #${o.id}
+          </b>
 
           <br>
 
@@ -514,7 +1153,9 @@ async function loadOrders(){
           <br>
 
           Status:
-          <b>${o.status}</b>
+          <b>
+            ${o.status}
+          </b>
 
           <br>
 
@@ -528,14 +1169,407 @@ async function loadOrders(){
 
       "No orders yet";
 
+
   }catch(e){
 
-    $("orderList").textContent=e.message;
+    $("orderList").textContent =
+      e.message;
 
   }
 
 }
 
+
+/* SELLER DASHBOARD */
+
+async function loadSeller(){
+
+  if(role!=="seller"){
+
+    $("sellerProducts").textContent =
+      "Seller login required";
+
+    return;
+
+  }
+
+
+  try{
+
+    let products =
+      await api(
+        "/api/seller/products"
+      );
+
+
+    let orders =
+      await api(
+        "/api/orders"
+      );
+
+
+    /* PRODUCTS */
+
+    $("sellerProducts").innerHTML =
+      products.length
+
+      ?
+
+      products.map(p=>`
+
+        <div class="sellerProduct">
+
+          <b>
+            ${p.name}
+          </b>
+
+          <br>
+
+          ₹${p.price}
+
+          <br>
+
+          Stock:
+          ${p.stock}
+
+          <br>
+
+          <small>
+            ${p.description || ""}
+          </small>
+
+          <br>
+
+          <button
+            onclick="editSellerProduct(${p.id})">
+
+            ✏ Edit
+
+          </button>
+
+          <button
+            class="danger"
+            onclick="deleteSellerProduct(${p.id})">
+
+            🗑 Delete
+
+          </button>
+
+        </div>
+
+      `).join("")
+
+      :
+
+      "No products yet.";
+
+
+    /* ORDERS */
+
+    $("sellerOrders").innerHTML =
+      orders.length
+
+      ?
+
+      orders.map(o=>`
+
+        <div class="sellerProduct">
+
+          <b>
+            Order #${o.id}
+          </b>
+
+          <br>
+
+          Seller subtotal:
+          ₹${o.sellerSubtotal || 0}
+
+          <br>
+
+          Status:
+          <b>
+            ${o.status}
+          </b>
+
+          <br>
+
+          ${
+            (o.items || [])
+              .map(i=>
+                `${i.name} × ${i.qty}`
+              )
+              .join("<br>")
+          }
+
+        </div>
+
+      `).join("")
+
+      :
+
+      "No seller orders yet.";
+
+
+  }catch(e){
+
+    $("sellerProducts").textContent =
+      e.message;
+
+    $("sellerOrders").textContent =
+      e.message;
+
+  }
+
+}
+
+
+/* ADD SELLER PRODUCT */
+
+async function addSellerProduct(){
+
+  try{
+
+    let name =
+      $("sellerName").value.trim();
+
+    let description =
+      $("sellerDescription")
+        .value.trim();
+
+    let price =
+      Number(
+        $("sellerPrice").value
+      );
+
+    let stock =
+      Number(
+        $("sellerStock").value
+      );
+
+    let image =
+      $("sellerImage").value.trim();
+
+
+    if(!name){
+
+      alert(
+        "Enter product name"
+      );
+
+      return;
+
+    }
+
+
+    if(
+      !Number.isFinite(price) ||
+      price < 0
+    ){
+
+      alert("Enter valid price");
+
+      return;
+
+    }
+
+
+    if(
+      !Number.isInteger(stock) ||
+      stock < 0
+    ){
+
+      alert("Enter valid stock");
+
+      return;
+
+    }
+
+
+    await api(
+      "/api/seller/products",
+      {
+
+        method:"POST",
+
+        body:JSON.stringify({
+
+          name:name,
+
+          description:description,
+
+          price:price,
+
+          stock:stock,
+
+          image:image
+
+        })
+
+      }
+    );
+
+
+    alert(
+      "Product added successfully"
+    );
+
+
+    $("sellerName").value="";
+
+    $("sellerDescription").value="";
+
+    $("sellerPrice").value="";
+
+    $("sellerStock").value="";
+
+    $("sellerImage").value="";
+
+
+    loadSeller();
+
+    load();
+
+
+  }catch(e){
+
+    alert(e.message);
+
+  }
+
+}
+
+
+/* EDIT SELLER PRODUCT */
+
+async function editSellerProduct(id){
+
+  let name =
+    prompt(
+      "New product name:"
+    );
+
+
+  if(name===null){
+
+    return;
+
+  }
+
+
+  let price =
+    prompt(
+      "New price:"
+    );
+
+
+  if(price===null){
+
+    return;
+
+  }
+
+
+  let stock =
+    prompt(
+      "New stock:"
+    );
+
+
+  if(stock===null){
+
+    return;
+
+  }
+
+
+  try{
+
+    await api(
+      "/api/seller/products/"+id,
+      {
+
+        method:"PUT",
+
+        body:JSON.stringify({
+
+          name:name,
+
+          price:Number(price),
+
+          stock:Number(stock)
+
+        })
+
+      }
+    );
+
+
+    alert(
+      "Product updated"
+    );
+
+
+    loadSeller();
+
+    load();
+
+
+  }catch(e){
+
+    alert(e.message);
+
+  }
+
+}
+
+
+/* DELETE SELLER PRODUCT */
+
+async function deleteSellerProduct(id){
+
+  if(
+    !confirm(
+      "Delete this product?"
+    )
+  ){
+
+    return;
+
+  }
+
+
+  try{
+
+    await api(
+      "/api/seller/products/"+id,
+      {
+
+        method:"DELETE"
+
+      }
+    );
+
+
+    alert(
+      "Product deleted"
+    );
+
+
+    loadSeller();
+
+    load();
+
+
+  }catch(e){
+
+    alert(e.message);
+
+  }
+
+}
+
+
+/* ADMIN */
 
 async function loadAdmin(){
 
@@ -548,23 +1582,35 @@ async function loadAdmin(){
 
   }
 
+
   try{
 
-    let os = await api("/api/orders");
-    let ps = await api("/api/products");
+    let os =
+      await api("/api/orders");
+
+    let ps =
+      await api("/api/products");
+
 
     $("adminBox").innerHTML = `
 
-      <h3>Orders (${os.length})</h3>
+      <h3>
+        Orders (${os.length})
+      </h3>
+
 
       ${
-        os.length ?
+        os.length
+
+        ?
 
         os.map(o=>`
 
           <div class="order">
 
-            <b>Order #${o.id}</b>
+            <b>
+              Order #${o.id}
+            </b>
 
             <br>
 
@@ -572,38 +1618,58 @@ async function loadAdmin(){
 
             <br>
 
-            Status: ${o.status}
+            Status:
+            ${o.status}
 
             <select
               onchange="changeStatus(
                 ${o.id},
                 this.value
-              )"
-            >
+              )">
 
               <option value="Pending"
-                ${o.status==="Pending"?"selected":""}>
+                ${o.status==="Pending"
+                  ?"selected":""
+                }>
+
                 Pending
+
               </option>
 
               <option value="Confirmed"
-                ${o.status==="Confirmed"?"selected":""}>
+                ${o.status==="Confirmed"
+                  ?"selected":""
+                }>
+
                 Confirmed
+
               </option>
 
               <option value="Shipped"
-                ${o.status==="Shipped"?"selected":""}>
+                ${o.status==="Shipped"
+                  ?"selected":""
+                }>
+
                 Shipped
+
               </option>
 
               <option value="Delivered"
-                ${o.status==="Delivered"?"selected":""}>
+                ${o.status==="Delivered"
+                  ?"selected":""
+                }>
+
                 Delivered
+
               </option>
 
               <option value="Cancelled"
-                ${o.status==="Cancelled"?"selected":""}>
+                ${o.status==="Cancelled"
+                  ?"selected":""
+                }>
+
                 Cancelled
+
               </option>
 
             </select>
@@ -615,46 +1681,63 @@ async function loadAdmin(){
         :
 
         "No orders yet"
+
       }
 
 
-      <h3>Add product</h3>
+      <h3>
+        Add Product
+      </h3>
 
-      <input id="n" placeholder="Name">
+
+      <input
+        id="n"
+        placeholder="Name">
+
 
       <input
         id="pr"
         type="number"
-        placeholder="Price"
-      >
+        placeholder="Price">
+
 
       <input
         id="im"
-        placeholder="Image URL"
-      >
+        placeholder="Image URL">
+
 
       <input
         id="st"
         type="number"
-        placeholder="Stock"
-      >
+        placeholder="Stock">
 
-      <button onclick="addProduct()">
+
+      <button
+        onclick="addProduct()">
+
         Add Product
+
       </button>
 
 
-      <h3>Products</h3>
+      <h3>
+        Products
+      </h3>
+
 
       ${
         ps.map(p=>`
 
           <div class="item">
 
-            ${p.name} ₹${p.price}
+            ${p.name}
+            ₹${p.price}
 
-            <button onclick="del(${p.id})">
+            <button
+              onclick="del(${p.id})">
+
               Delete
+
             </button>
 
           </div>
@@ -664,27 +1747,44 @@ async function loadAdmin(){
 
     `;
 
+
   }catch(e){
 
-    $("adminBox").textContent=e.message;
+    $("adminBox").textContent =
+      e.message;
 
   }
 
 }
 
 
-async function changeStatus(id,status){
+/* ADMIN ORDER STATUS */
+
+async function changeStatus(
+  id,
+  status
+){
 
   try{
 
-    await api("/api/orders/"+id,{
-      method:"PUT",
-      body:JSON.stringify({
-        status:status
-      })
-    });
+    await api(
+      "/api/orders/"+id,
+      {
+
+        method:"PUT",
+
+        body:JSON.stringify({
+
+          status:status
+
+        })
+
+      }
+    );
+
 
     loadAdmin();
+
 
   }catch(e){
 
@@ -694,37 +1794,55 @@ async function changeStatus(id,status){
 
 }
 
+
+/* ADMIN ADD PRODUCT */
 
 async function addProduct(){
 
   try{
 
-    await api("/api/products",{
-      method:"POST",
-      body:JSON.stringify({
+    await api(
+      "/api/admin/products",
+      {
 
-        name:$("n").value,
+        method:"POST",
 
-        price:Number(
-          $("pr").value
-        ),
+        body:JSON.stringify({
 
-        image:$("im").value,
+          name:
+            $("n").value,
 
-        description:
-          "Byenext product",
+          price:
+            Number(
+              $("pr").value
+            ),
 
-        stock:Number(
-          $("st").value
-        )
+          image:
+            $("im").value,
 
-      })
-    });
+          description:
+            "Byenext product",
 
-    alert("Product added");
+          stock:
+            Number(
+              $("st").value
+            )
+
+        })
+
+      }
+    );
+
+
+    alert(
+      "Product added"
+    );
+
 
     loadAdmin();
+
     load();
+
 
   }catch(e){
 
@@ -734,17 +1852,27 @@ async function addProduct(){
 
 }
 
+
+/* ADMIN DELETE */
 
 async function del(id){
 
   try{
 
-    await api("/api/products/"+id,{
-      method:"DELETE"
-    });
+    await api(
+      "/api/admin/products/"+id,
+      {
+
+        method:"DELETE"
+
+      }
+    );
+
 
     loadAdmin();
+
     load();
+
 
   }catch(e){
 
@@ -755,28 +1883,34 @@ async function del(id){
 }
 
 
+/* START */
+
 if(token){
 
-  $("login").classList.add("hidden");
+  $("login")
+    .classList.add("hidden");
 
-  $("adminBtn").style.display =
-    role==="admin"
-      ? "inline-block"
-      : "none";
+  updateMenu();
 
   load();
 
 }else{
 
-  $("login").classList.remove("hidden");
+  $("login")
+    .classList.remove("hidden");
 
-  $("adminBtn").style.display="none";
+  $("adminBtn")
+    .style.display="none";
+
+  $("sellerBtn")
+    .style.display="none";
 
 }
+
 
 renderCart();
 
 </script>
 
 </body>
-  </html>
+</html>
