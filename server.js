@@ -22,9 +22,9 @@ let data = {
   products: [
     {
       id: 1,
-      name: "Smartphone",
+      name: "Smart watch",
       description: "Latest smartphone",
-      price: 9999,
+      price: 999,
       image: "https://via.placeholder.com/300x200?text=Smartphone",
       stock: 20
     },
