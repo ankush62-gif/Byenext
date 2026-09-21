@@ -1,109 +1,166 @@
-<!DOCTYPE html>
-<html lang="en">
+<!doctype html>
+<html>
 <head>
-<meta charset="UTF-8">
+<meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Byenext</title>
 <style>
 *{box-sizing:border-box}body{margin:0;font-family:Arial;background:#111827;color:#111}
-.wrap{max-width:1100px;margin:auto;padding:20px}
-.card{background:white;border-radius:18px;padding:22px;margin:15px 0;box-shadow:0 5px 20px #0002}
-.login{max-width:420px;margin:50px auto;text-align:center}
-.logo{font-size:42px;font-weight:bold;color:#635bff}
-input,textarea,select{width:100%;padding:12px;margin:7px 0;border:1px solid #ddd;border-radius:10px;font-size:15px}
-button{border:0;border-radius:10px;padding:12px 18px;margin:5px;background:#635bff;color:white;font-weight:bold;cursor:pointer}
-.secondary{background:#e5e7eb;color:#111}.danger{background:#ef4444}
-nav{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
-.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:15px}
-.product img{width:100%;height:170px;object-fit:cover;border-radius:12px}
-.price{font-size:20px;font-weight:bold;color:#635bff}
-.msg{padding:10px;border-radius:8px;margin:8px 0;background:#f3f4f6}
-.hidden{display:none}.top{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+.box{max-width:1000px;margin:30px auto;padding:20px}.card{background:white;padding:22px;border-radius:16px;margin:15px 0}
+.login{max-width:400px;margin:60px auto;text-align:center}.logo{font-size:45px;font-weight:bold;color:#635bff}
+input,textarea{width:100%;padding:13px;margin:7px 0;border:1px solid #ddd;border-radius:9px}
+button{padding:12px 18px;margin:5px;border:0;border-radius:9px;background:#635bff;color:white;font-weight:bold}
+.gray{background:#ddd;color:#111}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:15px}
+.product img{width:100%;height:160px;object-fit:cover;border-radius:10px}.price{font-size:20px;font-weight:bold;color:#635bff}
+.hide{display:none}.msg{margin:10px;padding:10px;background:#eee;border-radius:8px}
 </style>
 </head>
 <body>
 
-<div id="loginPage" class="wrap">
+<div id="login" class="box">
 <div class="card login">
 <div class="logo">B</div>
 <h1>Byenext</h1>
 <p>Welcome to Byenext</p>
 <input id="email" placeholder="Email">
-<input id="password" type="password" placeholder="Password">
+<input id="pass" type="password" placeholder="Password">
 <button onclick="login()">Login</button>
-<button class="secondary" onclick="show('signup')">Create Account</button>
-<button class="secondary" onclick="show('seller')">Become a Seller</button>
-<div id="loginMsg" class="msg"></div>
+<button class="gray" onclick="signupBox()">Create Account</button>
+<div id="msg" class="msg"></div>
 </div>
 </div>
 
-<div id="signupPage" class="wrap hidden">
+<div id="signup" class="box hide">
 <div class="card login">
 <h2>Create Account</h2>
-<input id="suName" placeholder="Name">
-<input id="suEmail" placeholder="Email">
-<input id="suPass" type="password" placeholder="Password">
+<input id="name" placeholder="Name">
+<input id="semail" placeholder="Email">
+<input id="spass" type="password" placeholder="Password">
 <button onclick="signup()">Create Account</button>
-<button class="secondary" onclick="show('login')">Back</button>
-<div id="suMsg" class="msg"></div>
+<button class="gray" onclick="back()">Back</button>
+<div id="smsg" class="msg"></div>
 </div>
 </div>
 
-<div id="sellerPage" class="wrap hidden">
-<div class="card login">
-<h2>Seller Registration</h2>
-<input id="seName" placeholder="Seller Name">
-<input id="seEmail" placeholder="Email">
-<input id="sePass" type="password" placeholder="Password">
-<button onclick="sellerSignup()">Register Seller</button>
-<button class="secondary" onclick="show('login')">Back</button>
-<div id="seMsg" class="msg"></div>
-</div>
-</div>
-
-<div id="app" class="wrap hidden">
+<div id="app" class="box hide">
 <div class="card">
-<div class="top">
 <h2>🛍️ Byenext</h2>
-<div>
 <button onclick="home()">Shop</button>
 <button onclick="orders()">My Orders</button>
-<button id="sellerBtn" class="hidden" onclick="seller()">Seller</button>
-<button id="adminBtn" class="hidden" onclick="admin()">Admin</button>
-<button onclick="logout()" class="danger">Logout</button>
+<button onclick="cartPage()">🛒 Cart <span id="count">0</span></button>
+<button onclick="logout()">Logout</button>
 </div>
-</div>
-</div>
-
 <div id="content"></div>
 </div>
 
 <script>
-let token=localStorage.getItem("token"),me=null,products=[],cart=[];
+let token=localStorage.getItem("token");
+let products=[],cart=[],user=null;
 
-const $=id=>document.getElementById(id);
-function show(x){
-$("loginPage").classList.toggle("hidden",x!="login");
-$("signupPage").classList.toggle("hidden",x!="signup");
-$("sellerPage").classList.toggle("hidden",x!="seller");
-}
 async function api(url,opt={}){
- opt.headers=Object.assign({"Content-Type":"application/json"},opt.headers||{});
+ opt.headers={"Content-Type":"application/json",...(opt.headers||{})};
  if(token)opt.headers.Authorization="Bearer "+token;
  let r=await fetch(url,opt),d=await r.json().catch(()=>({}));
- if(!r.ok)throw Error(d.error||"Something went wrong");
+ if(!r.ok)throw Error(d.error||"Request failed");
  return d;
 }
-function msg(id,t){$(id).textContent=t}
+
+function signupBox(){
+ document.getElementById("login").classList.add("hide");
+ document.getElementById("signup").classList.remove("hide");
+}
+function back(){
+ document.getElementById("signup").classList.add("hide");
+ document.getElementById("login").classList.remove("hide");
+}
 
 async function login(){
  try{
   let d=await api("/api/login",{method:"POST",body:JSON.stringify({
-   email:$("email").value,password:$("password").value
+   email:email.value,password:pass.value
   })});
-  token=d.token;me=d.user;localStorage.setItem("token",token);start();
- }catch(e){msg("loginMsg",e.message)}
+  token=d.token;user=d.user;localStorage.setItem("token",token);
+  openApp();
+ }catch(e){msg.textContent=e.message}
 }
+
 async function signup(){
  try{
-  let d=await api("/api/register",{method:"POST",
+  let d=await api("/api/register",{method:"POST",body:JSON.stringify({
+   name:name.value,email:semail.value,password:spass.value
+  })});
+  token=d.token;user=d.user;localStorage.setItem("token",token);
+  openApp();
+ }catch(e){smsg.textContent=e.message}
+}
+
+async function openApp(){
+ login.classList.add("hide");signup.classList.add("hide");
+ app.classList.remove("hide");await load();home();
+}
+
+async function load(){products=await api("/api/products")}
+
+function home(){
+ let h='<div class="card"><h2>Products</h2><div class="grid">';
+ products.forEach(p=>{
+ h+=`<div class="card product">
+ <img src="${p.image||""}" onerror="this.style.display='none'">
+ <h3>${p.name}</h3><p>${p.description||""}</p>
+ <div class="price">₹${p.price}</div>
+ <button onclick="add(${p.id})">Add to Cart</button>
+ </div>`;
+ });
+ h+='</div></div>';content.innerHTML=h;
+}
+
+function add(id){
+ let x=cart.find(a=>a.id==id);
+ if(x)x.qty++;else cart.push({id:id,qty:1});
+ count.textContent=cart.reduce((a,b)=>a+b.qty,0);
+ alert("Added to cart");
+}
+
+function cartPage(){
+ let total=0,h='<div class="card"><h2>🛒 Cart</h2>';
+ cart.forEach(x=>{
+  let p=products.find(a=>a.id==x.id);
+  total+=p.price*x.qty;
+  h+=`<div class="msg">${p.name} × ${x.qty} = ₹${p.price*x.qty}</div>`;
+ });
+ let fee=total*.01;
+ h+=`<h3>Subtotal: ₹${total}</h3>
+ <p>Service fee 1%: ₹${fee.toFixed(2)}</p>
+ <h2>Total: ₹${(total+fee).toFixed(2)}</h2>
+ <textarea id="address" placeholder="Delivery address"></textarea>
+ <button onclick="order()">Place Order</button></div>`;
+ content.innerHTML=h;
+}
+
+async function order(){
+ try{
+  let d=await api("/api/orders",{method:"POST",body:JSON.stringify({
+   items:cart,address:address.value
+  })});
+  alert("Order #"+d.orderId+" created");
+  cart=[];count.textContent=0;orders();
+ }catch(e){alert(e.message)}
+}
+
+async function orders(){
+ try{
+  let a=await api("/api/orders"),h='<div class="card"><h2>My Orders</h2>';
+  a.forEach(o=>h+=`<div class="card"><b>Order #${o.id}</b>
+  <p>Status: ${o.status}</p><p>Total: ₹${o.total}</p></div>`);
+  h+='</div>';content.innerHTML=h;
+ }catch(e){alert(e.message)}
+}
+
+function logout(){
+ localStorage.removeItem("token");token=null;
+ app.classList.add("hide");login.classList.remove("hide");
+}
+if(token)openApp().catch(logout);
+</script>
+</body>
+</html>
