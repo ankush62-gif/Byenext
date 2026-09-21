@@ -15,7 +15,7 @@ let data = {
       id: 1,
       name: "Admin",
       email: "admin@byenext.com",
-      password: "Admin@123",
+      password: "Ankush@2009",
       role: "admin"
     }
   ],
