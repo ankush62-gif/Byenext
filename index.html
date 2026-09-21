@@ -9,70 +9,189 @@
 
 <body>
 
-<header>
-<div class="logo">Byenext</div>
+<header class="topbar">
 
-<nav>
-<button onclick="show('shop')">Shop</button>
-<button onclick="show('orders')">My Orders</button>
-<button id="adminBtn" style="display:none" onclick="show('admin')">Admin</button>
-<button onclick="logout()">Logout</button>
-</nav>
+  <div class="brand">
+    <div class="brandIcon">B</div>
+    <div class="logo">Byenext</div>
+  </div>
+
+  <nav>
+    <button onclick="show('shop')">🛒 Shop</button>
+    <button onclick="show('orders')">🛍 My Orders</button>
+    <button id="adminBtn" style="display:none" onclick="show('admin')">⚙ Admin</button>
+    <button onclick="logout()">↪ Logout</button>
+  </nav>
+
 </header>
+
 
 <main>
 
 <section id="shop">
-<h1>Shop with Byenext</h1>
-<p class="muted">Simple online ordering platform</p>
-<div id="products" class="grid"></div>
+
+  <div class="hero">
+
+    <div class="heroText">
+
+      <h1>
+        Shop with <span>Byenext</span>
+      </h1>
+
+      <p class="heroSub">
+        Simple online ordering platform
+      </p>
+
+      <div class="features">
+
+        <div class="feature">
+          <div class="featureIcon">⚡</div>
+          <div>
+            <b>Fast & Easy Ordering</b>
+            <p>Order your favorite products in just a few clicks.</p>
+          </div>
+        </div>
+
+        <div class="feature">
+          <div class="featureIcon">🛡</div>
+          <div>
+            <b>Secure Payments</b>
+            <p>Your transactions are safe and protected.</p>
+          </div>
+        </div>
+
+        <div class="feature">
+          <div class="featureIcon">🚚</div>
+          <div>
+            <b>Fast Delivery</b>
+            <p>Get your orders delivered to your doorstep.</p>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+
+    <div class="heroProducts">
+      <div class="shoppingBag">🛍️</div>
+      <div class="shoppingCart">🛒</div>
+      <div class="box">📦</div>
+    </div>
+
+  </div>
+
+
+  <h2 class="shopTitle">Our Products</h2>
+
+  <div id="products" class="grid"></div>
+
 </section>
+
 
 <section id="orders" class="hidden">
-<h2>My Orders</h2>
-<div id="orderList"></div>
+
+  <h2>My Orders</h2>
+
+  <div id="orderList"></div>
+
 </section>
 
+
 <section id="admin" class="hidden">
-<h2>Admin Panel</h2>
-<div id="adminBox"></div>
+
+  <h2>Admin Panel</h2>
+
+  <div id="adminBox"></div>
+
 </section>
 
 </main>
 
+
 <div id="cart" class="cart">
-<h3>Cart</h3>
 
-<div id="cartItems"></div>
+  <h3>🛒 Cart</h3>
 
-<b>Total: ₹<span id="total">0</span></b>
+  <div id="cartItems"></div>
 
-<input id="address" placeholder="Delivery address">
+  <b>Total: ₹<span id="total">0</span></b>
 
-<button onclick="checkout()">Place Order</button>
+  <input
+    id="address"
+    placeholder="Delivery address"
+  >
+
+  <button onclick="checkout()">
+    Place Order
+  </button>
+
 </div>
+
+
+<!-- LOGIN -->
 
 <div id="login" class="modal">
 
-<div class="card">
+  <div class="loginCard">
 
-<h2>Byenext Login</h2>
+    <div class="loginLogo">B</div>
 
-<input id="email" placeholder="Email">
+    <h2>Byenext</h2>
 
-<input id="password" type="password" placeholder="Password">
+    <p class="welcome">
+      Welcome back! Please login to your account.
+    </p>
 
-<input id="name" placeholder="Name (for signup)">
+    <div class="inputBox">
+      <span>✉</span>
+      <input
+        id="email"
+        placeholder="Email"
+        type="email"
+      >
+    </div>
 
-<button onclick="login()">Login</button>
+    <div class="inputBox">
+      <span>🔒</span>
+      <input
+        id="password"
+        type="password"
+        placeholder="Password"
+      >
+      <button
+        type="button"
+        class="eye"
+        onclick="togglePassword()"
+      >
+        👁
+      </button>
+    </div>
 
-<button class="secondary" onclick="signup()">Create account</button>
+    <div class="inputBox">
+      <span>👤</span>
+      <input
+        id="name"
+        placeholder="Name (for signup)"
+      >
+    </div>
 
-<p id="msg"></p>
+    <button
+      class="loginButton"
+      onclick="login()"
+    >
+      Login <span>→</span>
+    </button>
 
+    <button
+      class="createButton"
+      onclick="signup()"
+    >
+      Create account
+    </button>
 
+    <p id="msg"></p>
 
-</div>
+  </div>
 
 </div>
 
@@ -88,518 +207,570 @@ const $ = id => document.getElementById(id);
 
 async function api(url,opt={}){
 
-opt.headers={
-...(opt.headers||{}),
-...(token ? {Authorization:"Bearer "+token} : {})
-};
+  opt.headers = {
+    ...(opt.headers || {}),
+    ...(token ? {
+      Authorization:"Bearer "+token
+    } : {})
+  };
 
-if(opt.body){
-opt.headers["Content-Type"]="application/json";
-}
+  if(opt.body){
+    opt.headers["Content-Type"]="application/json";
+  }
 
-let r=await fetch(url,opt);
-let d=await r.json();
+  let r = await fetch(url,opt);
+  let d = await r.json();
 
-if(!r.ok){
-throw Error(d.error || "Something went wrong");
-}
+  if(!r.ok){
+    throw Error(d.error || "Something went wrong");
+  }
 
-return d;
+  return d;
 }
 
 
 function show(id){
 
-if(id==="admin" && role!=="admin"){
-alert("Admin login required");
-return;
-}
+  if(id==="admin" && role!=="admin"){
+    alert("Admin login required");
+    return;
+  }
 
-["shop","orders","admin"].forEach(x=>{
-$(x).classList.toggle("hidden",x!==id);
-});
+  ["shop","orders","admin"].forEach(x=>{
+    $(x).classList.toggle("hidden",x!==id);
+  });
 
-if(id==="orders"){
-loadOrders();
-}
+  if(id==="orders"){
+    loadOrders();
+  }
 
-if(id==="admin"){
-loadAdmin();
-}
+  if(id==="admin"){
+    loadAdmin();
+  }
 
 }
 
 
 async function load(){
 
-try{
+  try{
 
-let ps=await api("/api/products");
+    let ps = await api("/api/products");
 
-$("products").innerHTML=ps.map(p=>`
+    $("products").innerHTML = ps.map(p=>`
 
-<div class="product">
+      <div class="product">
 
-<img src="${p.image || ""}">
+        <img
+          src="${p.image || ""}"
+          alt="${p.name}"
+        >
 
-<h3>${p.name}</h3>
+        <h3>${p.name}</h3>
 
-<p>${p.description || ""}</p>
+        <p>${p.description || ""}</p>
 
-<b>₹${p.price}</b>
+        <b>₹${p.price}</b>
 
-<button onclick="add(${p.id})">
-Add to cart
-</button>
+        <button onclick="add(${p.id})">
+          Add to cart
+        </button>
 
-</div>
+      </div>
 
-`).join("");
+    `).join("");
 
-}catch(e){
+  }catch(e){
 
-console.error(e);
+    console.error(e);
 
-}
+  }
 
 }
 
 
 async function add(id){
 
-let ps=await api("/api/products");
+  let ps = await api("/api/products");
 
-let p=ps.find(x=>x.id===id);
+  let p = ps.find(x=>x.id===id);
 
-if(!p){
-alert("Product not found");
-return;
-}
+  if(!p){
+    alert("Product not found");
+    return;
+  }
 
-let x=cart.find(x=>x.id===id);
+  let x = cart.find(x=>x.id===id);
 
-if(x){
-x.qty++;
-}else{
+  if(x){
+    x.qty++;
+  }else{
 
-cart.push({
-id:p.id,
-qty:1,
-name:p.name,
-price:p.price
-});
+    cart.push({
+      id:p.id,
+      qty:1,
+      name:p.name,
+      price:p.price
+    });
 
-}
+  }
 
-renderCart();
+  renderCart();
 
 }
 
 
 function renderCart(){
 
-$("cartItems").innerHTML=cart.map(x=>`
+  $("cartItems").innerHTML = cart.map(x=>`
 
-<div class="item">
-${x.name} × ${x.qty}
-<b>₹${x.price*x.qty}</b>
-</div>
+    <div class="item">
 
-`).join("");
+      <span>
+        ${x.name} × ${x.qty}
+      </span>
 
-$("total").textContent=
-cart.reduce((s,x)=>s+(x.price*x.qty),0);
+      <b>
+        ₹${x.price*x.qty}
+      </b>
+
+    </div>
+
+  `).join("");
+
+  $("total").textContent =
+    cart.reduce(
+      (s,x)=>s+(x.price*x.qty),
+      0
+    );
 
 }
 
 
 async function checkout(){
 
-if(!token){
-alert("Please login first");
-return;
-}
+  if(!token){
+    alert("Please login first");
+    return;
+  }
 
-if(!cart.length){
-alert("Cart is empty");
-return;
-}
+  if(!cart.length){
+    alert("Cart is empty");
+    return;
+  }
 
-try{
+  try{
 
-let d=await api("/api/orders",{
-method:"POST",
-body:JSON.stringify({
-items:cart,
-address:$("address").value
-})
-});
+    let d = await api("/api/orders",{
+      method:"POST",
+      body:JSON.stringify({
+        items:cart,
+        address:$("address").value
+      })
+    });
 
-alert(
-"Order #"+d.orderId+
-" placed successfully."
-);
+    alert(
+      "Order #"+d.orderId+
+      " placed successfully."
+    );
 
-cart=[];
+    cart=[];
 
-renderCart();
+    renderCart();
 
-show("orders");
+    show("orders");
 
-}catch(e){
+  }catch(e){
 
-alert(e.message);
+    alert(e.message);
 
-}
+  }
 
 }
 
 
 async function login(){
 
-$("msg").textContent="Logging in...";
+  $("msg").textContent="Logging in...";
 
-try{
+  try{
 
-let d=await api("/api/login",{
-method:"POST",
-body:JSON.stringify({
-email:$("email").value.trim(),
-password:$("password").value
-})
-});
+    let d = await api("/api/login",{
+      method:"POST",
+      body:JSON.stringify({
+        email:$("email").value.trim(),
+        password:$("password").value
+      })
+    });
 
-token=d.token;
-role=d.user.role;
+    token=d.token;
+    role=d.user.role;
 
-localStorage.setItem("token",token);
-localStorage.setItem("role",role);
+    localStorage.setItem("token",token);
+    localStorage.setItem("role",role);
 
-$("adminBtn").style.display=
-role==="admin" ? "inline-block" : "none";
+    $("adminBtn").style.display =
+      role==="admin" ? "inline-block" : "none";
 
-$("login").classList.add("hidden");
+    $("login").classList.add("hidden");
 
-$("msg").textContent="";
+    $("msg").textContent="";
 
-await load();
+    await load();
 
-}catch(e){
+  }catch(e){
 
-$("msg").textContent=e.message;
+    $("msg").textContent=e.message;
 
-}
+  }
 
 }
 
 
 async function signup(){
 
-$("msg").textContent="Creating account...";
+  $("msg").textContent="Creating account...";
 
-try{
+  try{
 
-let d=await api("/api/register",{
-method:"POST",
-body:JSON.stringify({
-name:$("name").value.trim(),
-email:$("email").value.trim(),
-password:$("password").value
-})
-});
+    let d = await api("/api/register",{
+      method:"POST",
+      body:JSON.stringify({
+        name:$("name").value.trim(),
+        email:$("email").value.trim(),
+        password:$("password").value
+      })
+    });
 
-token=d.token;
-role=d.user.role;
+    token=d.token;
+    role=d.user.role;
 
-localStorage.setItem("token",token);
-localStorage.setItem("role",role);
+    localStorage.setItem("token",token);
+    localStorage.setItem("role",role);
 
-$("adminBtn").style.display=
-role==="admin" ? "inline-block" : "none";
+    $("adminBtn").style.display =
+      role==="admin" ? "inline-block" : "none";
 
-$("login").classList.add("hidden");
+    $("login").classList.add("hidden");
 
-$("msg").textContent="";
+    $("msg").textContent="";
 
-await load();
+    await load();
 
-}catch(e){
+  }catch(e){
 
-$("msg").textContent=e.message;
+    $("msg").textContent=e.message;
+
+  }
 
 }
+
+
+function togglePassword(){
+
+  let input = $("password");
+
+  if(input.type==="password"){
+    input.type="text";
+  }else{
+    input.type="password";
+  }
 
 }
 
 
 function logout(){
 
-localStorage.removeItem("token");
-localStorage.removeItem("role");
+  localStorage.removeItem("token");
+  localStorage.removeItem("role");
 
-token=null;
-role=null;
-cart=[];
+  token=null;
+  role=null;
+  cart=[];
 
-location.reload();
+  location.reload();
 
 }
 
 
 async function loadOrders(){
 
-try{
+  try{
 
-let os=await api("/api/orders");
+    let os = await api("/api/orders");
 
-$("orderList").innerHTML=os.length ?
+    $("orderList").innerHTML = os.length ?
 
-os.map(o=>`
+      os.map(o=>`
 
-<div class="order">
+        <div class="order">
 
-<b>Order #${o.id}</b>
+          <b>Order #${o.id}</b>
 
-<br>
+          <br>
 
-Total ₹${o.total}
+          Total ₹${o.total}
 
-<br>
+          <br>
 
-Status:
-<b>${o.status}</b>
+          Status:
+          <b>${o.status}</b>
 
-<br>
+          <br>
 
-${o.address || ""}
+          ${o.address || ""}
 
-</div>
+        </div>
 
-`).join("")
+      `).join("")
 
-:
+      :
 
-"No orders yet";
+      "No orders yet";
 
-}catch(e){
+  }catch(e){
 
-$("orderList").textContent=e.message;
+    $("orderList").textContent=e.message;
 
-}
+  }
 
 }
 
 
 async function loadAdmin(){
 
-if(role!=="admin"){
+  if(role!=="admin"){
 
-$("adminBox").textContent="Admin login required";
+    $("adminBox").textContent =
+      "Admin login required";
 
-return;
+    return;
 
-}
+  }
 
-try{
+  try{
 
-let os=await api("/api/orders");
-let ps=await api("/api/products");
+    let os = await api("/api/orders");
+    let ps = await api("/api/products");
 
-$("adminBox").innerHTML=`
+    $("adminBox").innerHTML = `
 
-<h3>Orders (${os.length})</h3>
+      <h3>Orders (${os.length})</h3>
 
-${
-os.length ?
+      ${
+        os.length ?
 
-os.map(o=>`
+        os.map(o=>`
 
-<div class="order">
+          <div class="order">
 
-<b>Order #${o.id}</b>
+            <b>Order #${o.id}</b>
 
-<br>
+            <br>
 
-₹${o.total}
+            ₹${o.total}
 
-<br>
+            <br>
 
-Status: ${o.status}
+            Status: ${o.status}
 
-<select onchange="changeStatus(${o.id},this.value)">
+            <select
+              onchange="changeStatus(
+                ${o.id},
+                this.value
+              )"
+            >
 
-<option value="Pending"
-${o.status==="Pending"?"selected":""}>
-Pending
-</option>
+              <option value="Pending"
+                ${o.status==="Pending"?"selected":""}>
+                Pending
+              </option>
 
-<option value="Confirmed"
-${o.status==="Confirmed"?"selected":""}>
-Confirmed
-</option>
+              <option value="Confirmed"
+                ${o.status==="Confirmed"?"selected":""}>
+                Confirmed
+              </option>
 
-<option value="Shipped"
-${o.status==="Shipped"?"selected":""}>
-Shipped
-</option>
+              <option value="Shipped"
+                ${o.status==="Shipped"?"selected":""}>
+                Shipped
+              </option>
 
-<option value="Delivered"
-${o.status==="Delivered"?"selected":""}>
-Delivered
-</option>
+              <option value="Delivered"
+                ${o.status==="Delivered"?"selected":""}>
+                Delivered
+              </option>
 
-<option value="Cancelled"
-${o.status==="Cancelled"?"selected":""}>
-Cancelled
-</option>
+              <option value="Cancelled"
+                ${o.status==="Cancelled"?"selected":""}>
+                Cancelled
+              </option>
 
-</select>
+            </select>
 
-</div>
+          </div>
 
-`).join("")
+        `).join("")
 
-:
+        :
 
-"No orders yet"
-}
-
-
-<h3>Add product</h3>
-
-<input id="n" placeholder="Name">
-
-<input id="pr" type="number" placeholder="Price">
-
-<input id="im" placeholder="Image URL">
-
-<input id="st" type="number" placeholder="Stock">
-
-<button onclick="addProduct()">
-Add Product
-</button>
+        "No orders yet"
+      }
 
 
-<h3>Products</h3>
+      <h3>Add product</h3>
 
-${
-ps.map(p=>`
+      <input id="n" placeholder="Name">
 
-<div class="item">
+      <input
+        id="pr"
+        type="number"
+        placeholder="Price"
+      >
 
-${p.name} ₹${p.price}
+      <input
+        id="im"
+        placeholder="Image URL"
+      >
 
-<button onclick="del(${p.id})">
-Delete
-</button>
+      <input
+        id="st"
+        type="number"
+        placeholder="Stock"
+      >
 
-</div>
+      <button onclick="addProduct()">
+        Add Product
+      </button>
 
-`).join("")
-}
 
-`;
+      <h3>Products</h3>
 
-}catch(e){
+      ${
+        ps.map(p=>`
 
-$("adminBox").textContent=e.message;
+          <div class="item">
 
-}
+            ${p.name} ₹${p.price}
+
+            <button onclick="del(${p.id})">
+              Delete
+            </button>
+
+          </div>
+
+        `).join("")
+      }
+
+    `;
+
+  }catch(e){
+
+    $("adminBox").textContent=e.message;
+
+  }
 
 }
 
 
 async function changeStatus(id,status){
 
-try{
+  try{
 
-await api("/api/orders/"+id,{
-method:"PUT",
-body:JSON.stringify({
-status:status
-})
-});
+    await api("/api/orders/"+id,{
+      method:"PUT",
+      body:JSON.stringify({
+        status:status
+      })
+    });
 
-loadAdmin();
+    loadAdmin();
 
-}catch(e){
+  }catch(e){
 
-alert(e.message);
+    alert(e.message);
 
-}
+  }
 
 }
 
 
 async function addProduct(){
 
-try{
+  try{
 
-await api("/api/products",{
-method:"POST",
-body:JSON.stringify({
+    await api("/api/products",{
+      method:"POST",
+      body:JSON.stringify({
 
-name:$("n").value,
+        name:$("n").value,
 
-price:Number($("pr").value),
+        price:Number(
+          $("pr").value
+        ),
 
-image:$("im").value,
+        image:$("im").value,
 
-description:"Byenext product",
+        description:
+          "Byenext product",
 
-stock:Number($("st").value)
+        stock:Number(
+          $("st").value
+        )
 
-})
-});
+      })
+    });
 
-alert("Product added");
+    alert("Product added");
 
-loadAdmin();
-load();
+    loadAdmin();
+    load();
 
-}catch(e){
+  }catch(e){
 
-alert(e.message);
+    alert(e.message);
 
-}
+  }
 
 }
 
 
 async function del(id){
 
-try{
+  try{
 
-await api("/api/products/"+id,{
-method:"DELETE"
-});
+    await api("/api/products/"+id,{
+      method:"DELETE"
+    });
 
-loadAdmin();
-load();
+    loadAdmin();
+    load();
 
-}catch(e){
+  }catch(e){
 
-alert(e.message);
+    alert(e.message);
 
-}
+  }
 
 }
 
 
 if(token){
 
-$("login").classList.add("hidden");
+  $("login").classList.add("hidden");
 
-$("adminBtn").style.display=
-role==="admin" ? "inline-block" : "none";
+  $("adminBtn").style.display =
+    role==="admin"
+      ? "inline-block"
+      : "none";
 
-load();
+  load();
 
 }else{
 
-$("login").classList.remove("hidden");
+  $("login").classList.remove("hidden");
 
-$("adminBtn").style.display="none";
+  $("adminBtn").style.display="none";
 
 }
 
@@ -608,4 +779,4 @@ renderCart();
 </script>
 
 </body>
-</html>
+  </html>
