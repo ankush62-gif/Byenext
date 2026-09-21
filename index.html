@@ -2,89 +2,259 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Byenext</title>
 
 <style>
 *{box-sizing:border-box}
-body{margin:0;font-family:Arial,sans-serif;background:#f5f7ff;color:#172033}
+
+body{
+margin:0;
+font-family:Arial,sans-serif;
+background:#f5f7ff;
+color:#172033;
+}
+
 .hidden{display:none!important}
 
-.login-screen{
-min-height:100vh;display:flex;align-items:center;justify-content:center;
-padding:20px;background:linear-gradient(135deg,#07112f,#312e81)
+button{
+border:0;
+border-radius:10px;
+padding:12px 18px;
+font-size:15px;
+font-weight:700;
+cursor:pointer;
+background:#2563eb;
+color:white;
 }
-.login-card{
-width:100%;max-width:430px;background:#fff;padding:35px;
-border-radius:25px;box-shadow:0 20px 60px #0005
-}
-.logo-icon{
-width:70px;height:70px;margin:auto;display:flex;align-items:center;
-justify-content:center;border-radius:18px;background:linear-gradient(135deg,#3b82f6,#7c3aed);
-color:white;font-size:40px;font-weight:800
-}
-.login-card h1{text-align:center;margin:15px 0 5px}
-.subtitle{text-align:center;color:#6b7280;margin-bottom:25px}
 
 input,textarea,select{
-width:100%;padding:13px;margin:7px 0;border:1px solid #d1d5db;
-border-radius:10px;font-size:15px
+width:100%;
+padding:13px;
+margin:7px 0;
+border:1px solid #d1d5db;
+border-radius:10px;
+font-size:15px;
 }
-textarea{min-height:90px}
 
-button{
-border:0;border-radius:10px;padding:11px 17px;font-size:15px;
-font-weight:600;cursor:pointer;background:#2563eb;color:white
+textarea{
+min-height:90px;
+resize:vertical;
 }
-.login-card button{width:100%;margin-top:10px}
-.secondary{background:#374151!important}
-.message{text-align:center;color:#dc2626;margin-top:15px}
+
+/* LOGIN */
+
+.login-screen{
+min-height:100vh;
+display:flex;
+align-items:center;
+justify-content:center;
+padding:20px;
+background:linear-gradient(135deg,#07112f,#312e81);
+}
+
+.login-card{
+width:100%;
+max-width:440px;
+background:white;
+padding:35px;
+border-radius:25px;
+box-shadow:0 20px 60px rgba(0,0,0,.3);
+}
+
+.logo-icon{
+width:70px;
+height:70px;
+margin:auto;
+display:flex;
+align-items:center;
+justify-content:center;
+border-radius:18px;
+background:linear-gradient(135deg,#3b82f6,#7c3aed);
+color:white;
+font-size:40px;
+font-weight:800;
+}
+
+.login-card h1{
+text-align:center;
+margin:15px 0 5px;
+}
+
+.subtitle{
+text-align:center;
+color:#6b7280;
+margin-bottom:25px;
+}
+
+.login-card button{
+width:100%;
+margin-top:10px;
+}
+
+.secondary{
+background:#374151;
+}
+
+.message{
+text-align:center;
+color:#dc2626;
+margin-top:15px;
+}
+
+/* HEADER */
 
 header{
-background:#111827;color:white;padding:16px 5%;display:flex;
-align-items:center;justify-content:space-between;gap:15px
+background:#111827;
+color:white;
+padding:16px 5%;
+display:flex;
+align-items:center;
+justify-content:space-between;
+gap:15px;
 }
-.logo{font-size:28px;font-weight:800}
-nav{display:flex;gap:8px;flex-wrap:wrap}
-nav button{background:white;color:#172033}
 
-main{padding:35px 5%}
-.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
-
-.product,.dashboard,.order{
-background:white;padding:18px;border-radius:16px;
-box-shadow:0 6px 22px #00000012
+.logo{
+font-size:28px;
+font-weight:800;
 }
+
+nav{
+display:flex;
+gap:8px;
+flex-wrap:wrap;
+}
+
+nav button{
+background:white;
+color:#172033;
+}
+
+/* MAIN */
+
+main{
+padding:30px 5%;
+}
+
+.grid{
+display:grid;
+grid-template-columns:repeat(3,1fr);
+gap:20px;
+}
+
+.product{
+background:white;
+padding:16px;
+border-radius:16px;
+box-shadow:0 6px 22px rgba(0,0,0,.08);
+}
+
 .product img{
-width:100%;height:220px;object-fit:cover;border-radius:12px;background:#eee
+width:100%;
+height:220px;
+object-fit:cover;
+border-radius:12px;
+background:#eee;
 }
-.product h3{font-size:20px}
-.product b{display:block;font-size:18px;margin:12px 0}
+
+.product h3{
+font-size:20px;
+}
+
+.product b{
+font-size:18px;
+display:block;
+margin:10px 0;
+}
+
+/* CART */
 
 .cart{
-position:fixed;right:20px;top:100px;width:360px;max-width:90%;
-background:white;padding:22px;border-radius:18px;
-box-shadow:0 10px 35px #0000002e;z-index:10
+position:fixed;
+right:20px;
+top:100px;
+width:350px;
+max-width:90%;
+background:white;
+padding:20px;
+border-radius:18px;
+box-shadow:0 10px 35px rgba(0,0,0,.2);
+z-index:20;
 }
-.item{padding:10px 0;border-bottom:1px solid #eee}
-.order{margin:15px 0}
+
+.item{
+padding:10px 0;
+border-bottom:1px solid #eee;
+}
+
+/* DASHBOARD */
+
+.dashboard{
+background:white;
+padding:22px;
+border-radius:18px;
+box-shadow:0 6px 25px rgba(0,0,0,.08);
+}
+
+.order{
+background:white;
+padding:18px;
+margin:15px 0;
+border-radius:14px;
+box-shadow:0 5px 18px rgba(0,0,0,.07);
+}
+
+/* IMAGE */
 
 .image-picker{
-border:2px dashed #2563eb;border-radius:14px;padding:20px;
-text-align:center;margin:10px 0;background:#f8faff
-}
-.image-picker input{border:0}
-.preview img{
-max-width:180px;max-height:150px;border-radius:12px;object-fit:cover
+border:2px dashed #2563eb;
+border-radius:14px;
+padding:20px;
+text-align:center;
+margin:12px 0;
+background:#f8faff;
 }
 
-@media(max-width:900px){.grid{grid-template-columns:1fr 1fr}}
+.preview img{
+max-width:200px;
+max-height:160px;
+border-radius:12px;
+margin-top:10px;
+}
+
+/* MOBILE */
+
+@media(max-width:900px){
+.grid{
+grid-template-columns:1fr 1fr;
+}
+}
+
 @media(max-width:600px){
-header{flex-direction:column}
-.grid{grid-template-columns:1fr}
-main{padding:25px 15px}
-.cart{position:static;width:auto;max-width:100%;margin:20px 0}
-.login-card{padding:25px 20px}
+
+header{
+flex-direction:column;
+}
+
+.grid{
+grid-template-columns:1fr;
+}
+
+main{
+padding:20px 15px;
+}
+
+.cart{
+position:static;
+width:100%;
+max-width:100%;
+margin:20px 0;
+}
+
+.login-card{
+padding:25px 20px;
+}
+
 }
 </style>
 </head>
@@ -92,207 +262,422 @@ main{padding:25px 15px}
 <body>
 
 <!-- LOGIN -->
+
 <section id="loginScreen" class="login-screen">
+
 <div class="login-card">
 
 <div class="logo-icon">B</div>
+
 <h1>Byenext</h1>
-<div class="subtitle">Welcome back! Please login to your account.</div>
 
-<input id="loginEmail" type="email" placeholder="Email">
-<input id="loginPassword" type="password" placeholder="Password">
+<div class="subtitle">
+Welcome back! Please login to your account.
+</div>
 
-<button onclick="login()">Login</button>
-<button class="secondary" onclick="showSignup()">Create Account</button>
-<button class="secondary" onclick="showSellerRegister()">Become a Seller</button>
+<input
+id="loginEmail"
+type="email"
+placeholder="Email"
+>
+
+<input
+id="loginPassword"
+type="password"
+placeholder="Password"
+>
+
+<button id="loginButton">
+Login
+</button>
+
+<button id="signupButton" class="secondary">
+Create Account
+</button>
+
+<button id="sellerButton" class="secondary">
+Become a Seller
+</button>
 
 <div id="loginMsg" class="message"></div>
+
 </div>
+
 </section>
 
-<!-- CUSTOMER SIGNUP -->
+
+<!-- CUSTOMER REGISTER -->
+
 <section id="signupScreen" class="login-screen hidden">
+
 <div class="login-card">
 
 <div class="logo-icon">B</div>
+
 <h1>Create Account</h1>
-<div class="subtitle">Create your Byenext customer account.</div>
 
-<input id="signupName" type="text" placeholder="Name">
-<input id="signupEmail" type="email" placeholder="Email">
-<input id="signupPassword" type="password" placeholder="Password">
+<div class="subtitle">
+Create your Byenext customer account.
+</div>
 
-<button onclick="registerCustomer()">Create Account</button>
-<button class="secondary" onclick="backToLogin()">Back to Login</button>
+<input
+id="signupName"
+type="text"
+placeholder="Name"
+>
+
+<input
+id="signupEmail"
+type="email"
+placeholder="Email"
+>
+
+<input
+id="signupPassword"
+type="password"
+placeholder="Password"
+>
+
+<button id="registerCustomerButton">
+Create Account
+</button>
+
+<button id="signupBackButton" class="secondary">
+Back to Login
+</button>
 
 <div id="signupMsg" class="message"></div>
+
 </div>
+
 </section>
 
-<!-- SELLER SIGNUP -->
-<section id="sellerRegister" class="login-screen hidden">
+
+<!-- SELLER REGISTER -->
+
+<section id="sellerScreen" class="login-screen hidden">
+
 <div class="login-card">
 
 <div class="logo-icon">B</div>
+
 <h1>Byenext Seller</h1>
-<div class="subtitle">Create your seller account.</div>
 
-<input id="sellerName" type="text" placeholder="Seller Name">
-<input id="sellerEmail" type="email" placeholder="Email">
-<input id="sellerPassword" type="password" placeholder="Password">
+<div class="subtitle">
+Create your seller account.
+</div>
 
-<button onclick="registerSeller()">Create Seller Account</button>
-<button class="secondary" onclick="backToLogin()">Back to Login</button>
+<input
+id="sellerName"
+type="text"
+placeholder="Seller Name"
+>
+
+<input
+id="sellerEmail"
+type="email"
+placeholder="Email"
+>
+
+<input
+id="sellerPassword"
+type="password"
+placeholder="Password"
+>
+
+<button id="registerSellerButton">
+Create Seller Account
+</button>
+
+<button id="sellerBackButton" class="secondary">
+Back to Login
+</button>
 
 <div id="sellerMsg" class="message"></div>
+
 </div>
+
 </section>
 
+
 <!-- APP -->
+
 <div id="app" class="hidden">
 
 <header>
-<div class="logo">Byenext</div>
+
+<div class="logo">
+Byenext
+</div>
 
 <nav>
-<button onclick="showSection('shop')">Shop</button>
-<button onclick="showSection('orders')">My Orders</button>
-<button id="sellerBtn" class="hidden" onclick="showSection('seller')">Seller</button>
-<button id="adminBtn" class="hidden" onclick="showSection('admin')">Admin</button>
-<button onclick="logout()">Logout</button>
+
+<button id="shopNav">
+Shop
+</button>
+
+<button id="ordersNav">
+My Orders
+</button>
+
+<button id="sellerNav" class="hidden">
+Seller
+</button>
+
+<button id="adminNav" class="hidden">
+Admin
+</button>
+
+<button id="logoutButton">
+Logout
+</button>
+
 </nav>
+
 </header>
 
+
 <!-- SHOP -->
-<main id="shop">
+
+<main id="shopSection">
+
 <h1>Shop</h1>
+
 <div id="products" class="grid"></div>
 
 <div class="cart">
+
 <h2>🛒 Cart</h2>
-<div id="cartItems"></div>
-<h3>Total: ₹<span id="cartTotal">0</span></h3>
-<input id="address" placeholder="Delivery address">
-<button onclick="placeOrder()">Place Order</button>
+
+<div id="cartItems">
+No items in cart.
 </div>
+
+<h3>
+Total: ₹<span id="cartTotal">0</span>
+</h3>
+
+<input
+id="address"
+placeholder="Delivery address"
+>
+
+<button id="placeOrderButton">
+Place Order
+</button>
+
+</div>
+
 </main>
+
 
 <!-- ORDERS -->
-<main id="orders" class="hidden">
+
+<main id="ordersSection" class="hidden">
+
 <h1>My Orders</h1>
+
 <div id="ordersList"></div>
+
 </main>
 
+
 <!-- SELLER -->
-<main id="seller" class="hidden">
+
+<main id="sellerSection" class="hidden">
 
 <h1>📦 Seller Dashboard</h1>
 
 <div class="dashboard">
+
 <h2>➕ Add Product</h2>
 
-<input id="productName" placeholder="Product name">
+<input
+id="productName"
+placeholder="Product name"
+>
 
-<textarea id="productDescription"
-placeholder="Product description"></textarea>
+<textarea
+id="productDescription"
+placeholder="Product description"
+></textarea>
 
-<input id="productPrice" type="number" placeholder="Price">
+<input
+id="productPrice"
+type="number"
+placeholder="Price"
+>
 
-<input id="productStock" type="number" placeholder="Stock">
+<input
+id="productStock"
+type="number"
+placeholder="Stock"
+>
 
 <div class="image-picker">
-<strong>📷 Product Image</strong>
-<p>Select directly from Gallery</p>
 
-<input id="productImage"
+<strong>📷 Product Image</strong>
+
+<p>
+Select directly from Gallery
+</p>
+
+<input
+id="productImage"
 type="file"
 accept="image/*"
-onchange="previewImage()">
+>
 
 <div id="imagePreview" class="preview"></div>
+
 </div>
 
-<button onclick="addSellerProduct()">Add Product</button>
+<button id="addProductButton">
+Add Product
+</button>
+
 </div>
+
 
 <br>
 
+
 <div class="dashboard">
+
 <h2>📦 Seller Orders</h2>
-<div id="sellerOrders">No seller orders yet.</div>
+
+<div id="sellerOrders">
+No seller orders yet.
 </div>
+
+</div>
+
 
 <br>
 
+
 <div class="dashboard">
+
 <h2>🛍️ My Products</h2>
+
 <div id="sellerProducts"></div>
+
 </div>
 
 </main>
 
+
 <!-- ADMIN -->
-<main id="admin" class="hidden">
+
+<main id="adminSection" class="hidden">
 
 <h1>Admin Panel</h1>
 
 <div class="dashboard">
+
 <h2>Orders</h2>
+
 <div id="adminOrders"></div>
+
 </div>
 
 <br>
 
 <div class="dashboard">
+
 <h2>Products</h2>
+
 <div id="adminProducts"></div>
+
 </div>
 
 </main>
 
 </div>
 
+
 <script>
 
-let token=localStorage.getItem("token");
-let role=localStorage.getItem("role");
-let cart=[];
+let token = localStorage.getItem("token");
+let role = localStorage.getItem("role");
+
+let cart = [];
+
+
+/* SHORTCUT */
 
 function $(id){
 return document.getElementById(id);
 }
 
-async function api(url,options={}){
-options.headers={
-"Content-Type":"application/json",
-...(options.headers||{})
+
+/* API */
+
+async function api(url, options = {}){
+
+const headers = {
+"Content-Type":"application/json"
 };
 
 if(token){
-options.headers.Authorization="Bearer "+token;
+headers.Authorization = "Bearer " + token;
 }
 
-const response=await fetch(url,options);
-const data=await response.json();
+const response = await fetch(url,{
+...options,
+headers:headers
+});
+
+let data;
+
+try{
+data = await response.json();
+}catch{
+throw new Error("Server response error");
+}
 
 if(!response.ok){
-throw new Error(data.error||"Something went wrong");
+throw new Error(data.error || "Something went wrong");
 }
 
 return data;
 }
 
+
+/* SCREEN */
+
+function showOnly(screen){
+
+$("loginScreen").classList.add("hidden");
+$("signupScreen").classList.add("hidden");
+$("sellerScreen").classList.add("hidden");
+$("app").classList.add("hidden");
+
+$(screen).classList.remove("hidden");
+
+}
+
+
 /* LOGIN */
 
-async function login(){
+$("loginButton").addEventListener("click",async function(){
+
+$("loginMsg").textContent="Logging in...";
 
 try{
+
+const email=$("loginEmail").value.trim();
+const password=$("loginPassword").value;
+
+if(!email || !password){
+throw new Error("Email and password are required");
+}
 
 const data=await api("/api/login",{
 method:"POST",
 body:JSON.stringify({
-email:$("loginEmail").value.trim(),
-password:$("loginPassword").value
+email:email,
+password:password
 })
 });
 
@@ -304,35 +689,46 @@ localStorage.setItem("role",role);
 
 openApp();
 
-}catch(e){
+}catch(error){
 
-$("loginMsg").textContent=e.message;
-
-}
-}
-
-/* CUSTOMER SIGNUP */
-
-function showSignup(){
-
-$("loginScreen").classList.add("hidden");
-$("sellerRegister").classList.add("hidden");
-$("signupScreen").classList.remove("hidden");
+$("loginMsg").textContent=error.message;
 
 }
 
-async function registerCustomer(){
+});
+
+
+/* CUSTOMER SIGNUP SCREEN */
+
+$("signupButton").addEventListener("click",function(){
+
+showOnly("signupScreen");
+
+});
+
+
+/* CUSTOMER REGISTER */
+
+$("registerCustomerButton").addEventListener("click",async function(){
 
 $("signupMsg").textContent="Creating account...";
 
 try{
 
+const name=$("signupName").value.trim();
+const email=$("signupEmail").value.trim();
+const password=$("signupPassword").value;
+
+if(!name || !email || !password){
+throw new Error("All fields are required");
+}
+
 const data=await api("/api/register",{
 method:"POST",
 body:JSON.stringify({
-name:$("signupName").value.trim(),
-email:$("signupEmail").value.trim(),
-password:$("signupPassword").value
+name:name,
+email:email,
+password:password
 })
 });
 
@@ -344,27 +740,550 @@ localStorage.setItem("role",role);
 
 openApp();
 
-}catch(e){
+}catch(error){
 
-$("signupMsg").textContent=e.message;
-
-}
-}
-
-/* SELLER */
-
-function showSellerRegister(){
-
-$("loginScreen").classList.add("hidden");
-$("signupScreen").classList.add("hidden");
-$("sellerRegister").classList.remove("hidden");
+$("signupMsg").textContent=error.message;
 
 }
 
-async function registerSeller(){
+});
+
+
+/* BACK */
+
+$("signupBackButton").addEventListener("click",function(){
+showOnly("loginScreen");
+});
+
+$("sellerBackButton").addEventListener("click",function(){
+showOnly("loginScreen");
+});
+
+
+/* SELLER SCREEN */
+
+$("sellerButton").addEventListener("click",function(){
+
+showOnly("sellerScreen");
+
+});
+
+
+/* SELLER REGISTER */
+
+$("registerSellerButton").addEventListener("click",async function(){
 
 $("sellerMsg").textContent="Creating seller account...";
 
 try{
 
-const data=await
+const name=$("sellerName").value.trim();
+const email=$("sellerEmail").value.trim();
+const password=$("sellerPassword").value;
+
+if(!name || !email || !password){
+throw new Error("All fields are required");
+}
+
+const data=await api("/api/register-seller",{
+method:"POST",
+body:JSON.stringify({
+name:name,
+email:email,
+password:password
+})
+});
+
+token=data.token;
+role=data.user.role;
+
+localStorage.setItem("token",token);
+localStorage.setItem("role",role);
+
+openApp();
+
+}catch(error){
+
+$("sellerMsg").textContent=error.message;
+
+}
+
+});
+
+
+/* OPEN APP */
+
+function openApp(){
+
+showOnly("app");
+
+$("sellerNav").classList.toggle(
+"hidden",
+role!=="seller"
+);
+
+$("adminNav").classList.toggle(
+"hidden",
+role!=="admin"
+);
+
+showSection("shop");
+
+}
+
+
+/* NAVIGATION */
+
+$("shopNav").addEventListener("click",function(){
+showSection("shop");
+});
+
+$("ordersNav").addEventListener("click",function(){
+showSection("orders");
+});
+
+$("sellerNav").addEventListener("click",function(){
+showSection("seller");
+});
+
+$("adminNav").addEventListener("click",function(){
+showSection("admin");
+});
+
+
+function showSection(section){
+
+$("shopSection").classList.add("hidden");
+$("ordersSection").classList.add("hidden");
+$("sellerSection").classList.add("hidden");
+$("adminSection").classList.add("hidden");
+
+if(section==="shop"){
+$("shopSection").classList.remove("hidden");
+loadProducts();
+}
+
+if(section==="orders"){
+$("ordersSection").classList.remove("hidden");
+loadOrders();
+}
+
+if(section==="seller"){
+$("sellerSection").classList.remove("hidden");
+loadSellerProducts();
+loadSellerOrders();
+}
+
+if(section==="admin"){
+$("adminSection").classList.remove("hidden");
+loadAdmin();
+}
+
+}
+
+
+/* PRODUCTS */
+
+async function loadProducts(){
+
+try{
+
+const products=await api("/api/products");
+
+$("products").innerHTML="";
+
+if(products.length===0){
+$("products").innerHTML="<p>No products available.</p>";
+return;
+}
+
+products.forEach(function(product){
+
+const div=document.createElement("div");
+
+div.className="product";
+
+div.innerHTML=`
+
+<img src="${product.image || 'https://via.placeholder.com/300x200?text=Byenext'}">
+
+<h3>${escapeHtml(product.name)}</h3>
+
+<p>${escapeHtml(product.description || "")}</p>
+
+<b>₹${product.price}</b>
+
+<p>Stock: ${product.stock}</p>
+
+<button class="addCartButton">
+Add to Cart
+</button>
+
+`;
+
+div.querySelector(".addCartButton")
+.addEventListener("click",function(){
+
+addToCart(product.id);
+
+});
+
+$("products").appendChild(div);
+
+});
+
+}catch(error){
+
+$("products").innerHTML=
+"<p>"+escapeHtml(error.message)+"</p>";
+
+}
+
+}
+
+
+/* CART */
+
+async function addToCart(id){
+
+try{
+
+const products=await api("/api/products");
+
+const product=products.find(function(p){
+return p.id===id;
+});
+
+if(!product)return;
+
+const existing=cart.find(function(item){
+return item.id===id;
+});
+
+if(existing){
+existing.qty++;
+}else{
+
+cart.push({
+id:product.id,
+name:product.name,
+price:Number(product.price),
+qty:1
+});
+
+}
+
+renderCart();
+
+}catch(error){
+
+alert(error.message);
+
+}
+
+}
+
+
+function renderCart(){
+
+$("cartItems").innerHTML="";
+
+let total=0;
+
+if(cart.length===0){
+
+$("cartItems").textContent="No items in cart.";
+
+}else{
+
+cart.forEach(function(item){
+
+total += item.price * item.qty;
+
+const div=document.createElement("div");
+
+div.className="item";
+
+div.innerHTML=`
+
+${escapeHtml(item.name)}
+× ${item.qty}
+
+<button class="removeButton">
+−
+</button>
+
+`;
+
+div.querySelector(".removeButton")
+.addEventListener("click",function(){
+
+removeCart(item.id);
+
+});
+
+$("cartItems").appendChild(div);
+
+});
+
+}
+
+$("cartTotal").textContent=total.toFixed(2);
+
+}
+
+
+function removeCart(id){
+
+const item=cart.find(function(x){
+return x.id===id;
+});
+
+if(!item)return;
+
+item.qty--;
+
+if(item.qty<=0){
+
+cart=cart.filter(function(x){
+return x.id!==id;
+});
+
+}
+
+renderCart();
+
+}
+
+
+/* PLACE ORDER */
+
+$("placeOrderButton").addEventListener("click",async function(){
+
+if(cart.length===0){
+alert("Cart is empty");
+return;
+}
+
+const address=$("address").value.trim();
+
+if(!address){
+alert("Delivery address is required");
+return;
+}
+
+try{
+
+const data=await api("/api/orders",{
+method:"POST",
+body:JSON.stringify({
+items:cart,
+address:address
+})
+});
+
+alert("Order placed successfully! Order #"+data.orderId);
+
+cart=[];
+$("address").value="";
+
+renderCart();
+
+}catch(error){
+
+alert(error.message);
+
+}
+
+});
+
+
+/* CUSTOMER ORDERS */
+
+async function loadOrders(){
+
+try{
+
+const orders=await api("/api/orders");
+
+$("ordersList").innerHTML="";
+
+if(orders.length===0){
+
+$("ordersList").innerHTML=
+"<p>No orders yet.</p>";
+
+return;
+
+}
+
+orders.forEach(function(order){
+
+const div=document.createElement("div");
+
+div.className="order";
+
+div.innerHTML=`
+
+<h3>Order #${order.id}</h3>
+
+<p>
+Status:
+<b>${escapeHtml(order.status)}</b>
+</p>
+
+<p>Total: ₹${order.total}</p>
+
+<p>
+Address: ${escapeHtml(order.address)}
+</p>
+
+`;
+
+$("ordersList").appendChild(div);
+
+});
+
+}catch(error){
+
+$("ordersList").textContent=error.message;
+
+}
+
+}
+
+
+/* IMAGE PREVIEW */
+
+$("productImage").addEventListener("change",function(){
+
+const file=this.files[0];
+
+if(!file)return;
+
+if(!file.type.startsWith("image/")){
+
+alert("Please select an image.");
+
+this.value="";
+
+return;
+
+}
+
+const reader=new FileReader();
+
+reader.onload=function(){
+
+$("imagePreview").innerHTML=
+`<img src="${reader.result}">`;
+
+};
+
+reader.readAsDataURL(file);
+
+});
+
+
+/* SELLER ADD PRODUCT */
+
+$("addProductButton").addEventListener("click",function(){
+
+const file=$("productImage").files[0];
+
+if(!file){
+
+alert("Please select product image from Gallery.");
+
+return;
+
+}
+
+const reader=new FileReader();
+
+reader.onload=async function(){
+
+try{
+
+const name=$("productName").value.trim();
+const description=$("productDescription").value.trim();
+const price=Number($("productPrice").value);
+const stock=Number($("productStock").value);
+
+if(!name){
+throw new Error("Product name is required");
+}
+
+if(!Number.isFinite(price) || price<0){
+throw new Error("Enter a valid price");
+}
+
+if(!Number.isInteger(stock) || stock<0){
+throw new Error("Enter a valid stock");
+}
+
+await api("/api/seller/products",{
+method:"POST",
+body:JSON.stringify({
+name:name,
+description:description,
+price:price,
+stock:stock,
+image:reader.result
+})
+});
+
+alert("Product added successfully!");
+
+$("productName").value="";
+$("productDescription").value="";
+$("productPrice").value="";
+$("productStock").value="";
+$("productImage").value="";
+$("imagePreview").innerHTML="";
+
+loadSellerProducts();
+
+}catch(error){
+
+alert(error.message);
+
+}
+
+};
+
+reader.readAsDataURL(file);
+
+});
+
+
+/* SELLER PRODUCTS */
+
+async function loadSellerProducts(){
+
+try{
+
+const products=await api("/api/seller/products");
+
+$("sellerProducts").innerHTML="";
+
+if(products.length===0){
+
+$("sellerProducts").innerHTML=
+"<p>No products yet.</p>";
+
+return;
+
+}
+
+products.forEach(function(product){
+
+const div=document.createElement("div");
+
+div.className="product";
+
+div.style.margin="12px 0";
+
+div.innerHTML=`
+
+<img
