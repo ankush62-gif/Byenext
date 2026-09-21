@@ -264,3 +264,27 @@ app.post("/api/orders", auth, (req, res) => {
 
 app.put("/api/orders/:id", auth, admin, (req, res) => {
   const
+id = Number(req.params.id);
+const order = data.orders.find(o => o.id === id);
+
+if (!order) {
+  return res.status(404).json({ error: "Order not found" });
+}
+
+const { status } = req.body;
+
+if (!status) {
+  return res.status(400).json({ error: "Status is required" });
+}
+
+order.status = status;
+saveData();
+
+res.json(order);
+});
+
+app.use(express.static(path.join(__dirname)));
+
+app.listen(PORT, () => {
+  console.log(`Byenext running on port ${PORT}`);
+});
