@@ -62,7 +62,7 @@ if (fs.existsSync(DATA_FILE)) {
 if (!Array.isArray(data.users)) data.users = [];
 if (!Array.isArray(data.products)) data.products = [];
 if (!Array.isArray(data.orders)) data.orders = [];
-
+if (!Array.isArray(data.payments)) data.payments = [];
 const adminUser = data.users.find(u => u.role === "admin");
 
 if (adminUser) {
@@ -749,7 +749,321 @@ app.post("/api/orders", auth, (req, res) => {
   });
 });
 
+/* =========================
+   RAZORPAY PAYMENT
+========================= */
 
+function razorpayAuth() {
+  const keyId = process.env.RAZORPAY_KEY_ID;
+  const keySecret = process.env.RAZORPAY_KEY_SECRET;
+
+  if (!keyId || !keySecret) {
+    throw new Error("Razorpay keys are not configured");
+  }
+
+  return {
+    keyId,
+    auth: Buffer.from(`${keyId}:${keySecret}`).toString("base64")
+  };
+}
+
+function calculatePaymentCart(items) {
+  if (!Array.isArray(items) || !items.length) {
+    throw new Error("Cart is empty");
+  }
+
+  let subtotal = 0;
+  const orderItems = [];
+
+  for (const item of items) {
+    const product = data.products.find(
+      p => p.id === Number(item.id)
+    );
+
+    if (!product) {
+      throw new Error("Product not found");
+    }
+
+    const qty = Number(item.qty);
+
+    if (!Number.isInteger(qty) || qty < 1) {
+      throw new Error("Invalid quantity");
+    }
+
+    if (product.stock < qty) {
+      throw new Error(`${product.name} is out of stock`);
+    }
+
+    subtotal += product.price * qty;
+
+    orderItems.push({
+      productId: product.id,
+      name: product.name,
+      price: product.price,
+      qty,
+      sellerId: product.sellerId || null
+    });
+  }
+
+  const serviceFee =
+    Math.round(subtotal * 0.01 * 100) / 100;
+
+  const total =
+    Math.round((subtotal + serviceFee) * 100) / 100;
+
+  return {
+    subtotal,
+    serviceFee,
+    total,
+    orderItems
+  };
+}
+
+
+/* CREATE RAZORPAY ORDER */
+
+app.post(
+  "/api/payment/create",
+  auth,
+  async (req, res) => {
+    try {
+      const { items, address } = req.body;
+
+      if (!address) {
+        return res.status(400).json({
+          error: "Delivery address is required"
+        });
+      }
+
+      const calc = calculatePaymentCart(items);
+
+      const {
+        keyId,
+        auth: authHeader
+      } = razorpayAuth();
+
+      const razorpayResponse = await fetch(
+        "https://api.razorpay.com/v1/orders",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": "Basic " + authHeader
+          },
+          body: JSON.stringify({
+            amount: Math.round(calc.total * 100),
+            currency: "INR",
+            receipt: `byenext_${Date.now()}`,
+            notes: {
+              userId: String(req.user.id)
+            }
+          })
+        }
+      );
+
+      const razorpayOrder =
+        await razorpayResponse.json();
+
+      if (!razorpayResponse.ok) {
+        return res.status(502).json({
+          error:
+            razorpayOrder.error?.description ||
+            "Razorpay order creation failed"
+        });
+      }
+
+      if (!Array.isArray(data.payments)) {
+        data.payments = [];
+      }
+
+      data.payments.push({
+        razorpayOrderId: razorpayOrder.id,
+        userId: req.user.id,
+        address: String(address),
+        items: items.map(item => ({
+          id: Number(item.id),
+          qty: Number(item.qty)
+        })),
+        total: calc.total,
+        subtotal: calc.subtotal,
+        serviceFee: calc.serviceFee,
+        status: "created",
+        createdAt: new Date().toISOString()
+      });
+
+      saveData();
+
+      res.json({
+        keyId,
+        razorpayOrderId: razorpayOrder.id,
+        amount: razorpayOrder.amount,
+        currency: razorpayOrder.currency,
+        total: calc.total,
+        serviceFee: calc.serviceFee
+      });
+
+    } catch (e) {
+      res.status(500).json({
+        error: e.message
+      });
+    }
+  }
+);
+
+
+/* VERIFY RAZORPAY PAYMENT */
+
+app.post(
+  "/api/payment/verify",
+  auth,
+  async (req, res) => {
+    try {
+      const {
+        razorpay_order_id,
+        razorpay_payment_id,
+        razorpay_signature
+      } = req.body;
+
+      const paymentRecord =
+        data.payments.find(
+          p =>
+            p.razorpayOrderId === razorpay_order_id &&
+            p.userId === req.user.id
+        );
+
+      if (!paymentRecord) {
+        return res.status(404).json({
+          error: "Payment order not found"
+        });
+      }
+
+      if (paymentRecord.status === "paid") {
+        return res.json({
+          ok: true,
+          orderId: paymentRecord.localOrderId,
+          total: paymentRecord.total
+        });
+      }
+
+      const secret =
+        process.env.RAZORPAY_KEY_SECRET;
+
+      const expectedSignature =
+        crypto
+          .createHmac("sha256", secret)
+          .update(
+            `${razorpay_order_id}|${razorpay_payment_id}`
+          )
+          .digest("hex");
+
+      if (
+        expectedSignature !==
+        razorpay_signature
+      ) {
+        return res.status(400).json({
+          error: "Payment signature verification failed"
+        });
+      }
+
+      const {
+        auth: authHeader
+      } = razorpayAuth();
+
+      const paymentResponse =
+        await fetch(
+          `https://api.razorpay.com/v1/payments/${encodeURIComponent(
+            razorpay_payment_id
+          )}`,
+          {
+            headers: {
+              "Authorization":
+                "Basic " + authHeader
+            }
+          }
+        );
+
+      const payment =
+        await paymentResponse.json();
+
+      if (
+        !paymentResponse.ok ||
+        payment.order_id !== razorpay_order_id ||
+        payment.status !== "captured"
+      ) {
+        return res.status(400).json({
+          error: "Payment is not captured"
+        });
+      }
+
+      if (
+        Number(payment.amount) !==
+        Math.round(paymentRecord.total * 100)
+      ) {
+        return res.status(400).json({
+          error: "Payment amount mismatch"
+        });
+      }
+
+      const calc =
+        calculatePaymentCart(
+          paymentRecord.items
+        );
+
+      const orderId =
+        data.orders.length
+          ? Math.max(
+              ...data.orders.map(o => o.id)
+            ) + 1
+          : 1;
+
+      for (const item of calc.orderItems) {
+        const product =
+          data.products.find(
+            p => p.id === item.productId
+          );
+
+        product.stock -= item.qty;
+      }
+
+      const order = {
+        id: orderId,
+        userId: req.user.id,
+        customer: req.user.name,
+        items: calc.orderItems,
+        address: paymentRecord.address,
+        subtotal: calc.subtotal,
+        serviceFee: calc.serviceFee,
+        total: calc.total,
+        status: "Pending",
+        paymentStatus: "Paid",
+        paymentProvider: "Razorpay",
+        razorpayOrderId: razorpay_order_id,
+        razorpayPaymentId: razorpay_payment_id,
+        createdAt: new Date().toISOString()
+      };
+
+      data.orders.push(order);
+
+      paymentRecord.status = "paid";
+      paymentRecord.localOrderId = orderId;
+      paymentRecord.paymentId =
+        razorpay_payment_id;
+
+      saveData();
+
+      res.json({
+        ok: true,
+        orderId: orderId,
+        total: order.total
+      });
+
+    } catch (e) {
+      res.status(500).json({
+        error: e.message
+      });
+    }
+  }
+);
 /* =========================
    UPDATE ORDER STATUS
 ========================= */
