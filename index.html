@@ -2,90 +2,108 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Byenext</title>
-
 <style>
-*{box-sizing:border-box}
+*{box-sizing:border-box}body{margin:0;font-family:Arial;background:#111827;color:#111}
+.wrap{max-width:1100px;margin:auto;padding:20px}
+.card{background:white;border-radius:18px;padding:22px;margin:15px 0;box-shadow:0 5px 20px #0002}
+.login{max-width:420px;margin:50px auto;text-align:center}
+.logo{font-size:42px;font-weight:bold;color:#635bff}
+input,textarea,select{width:100%;padding:12px;margin:7px 0;border:1px solid #ddd;border-radius:10px;font-size:15px}
+button{border:0;border-radius:10px;padding:12px 18px;margin:5px;background:#635bff;color:white;font-weight:bold;cursor:pointer}
+.secondary{background:#e5e7eb;color:#111}.danger{background:#ef4444}
+nav{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:15px}
+.product img{width:100%;height:170px;object-fit:cover;border-radius:12px}
+.price{font-size:20px;font-weight:bold;color:#635bff}
+.msg{padding:10px;border-radius:8px;margin:8px 0;background:#f3f4f6}
+.hidden{display:none}.top{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+</style>
+</head>
+<body>
 
-body{
-margin:0;
-font-family:Arial,sans-serif;
-background:#f5f7ff;
-color:#172033
+<div id="loginPage" class="wrap">
+<div class="card login">
+<div class="logo">B</div>
+<h1>Byenext</h1>
+<p>Welcome to Byenext</p>
+<input id="email" placeholder="Email">
+<input id="password" type="password" placeholder="Password">
+<button onclick="login()">Login</button>
+<button class="secondary" onclick="show('signup')">Create Account</button>
+<button class="secondary" onclick="show('seller')">Become a Seller</button>
+<div id="loginMsg" class="msg"></div>
+</div>
+</div>
+
+<div id="signupPage" class="wrap hidden">
+<div class="card login">
+<h2>Create Account</h2>
+<input id="suName" placeholder="Name">
+<input id="suEmail" placeholder="Email">
+<input id="suPass" type="password" placeholder="Password">
+<button onclick="signup()">Create Account</button>
+<button class="secondary" onclick="show('login')">Back</button>
+<div id="suMsg" class="msg"></div>
+</div>
+</div>
+
+<div id="sellerPage" class="wrap hidden">
+<div class="card login">
+<h2>Seller Registration</h2>
+<input id="seName" placeholder="Seller Name">
+<input id="seEmail" placeholder="Email">
+<input id="sePass" type="password" placeholder="Password">
+<button onclick="sellerSignup()">Register Seller</button>
+<button class="secondary" onclick="show('login')">Back</button>
+<div id="seMsg" class="msg"></div>
+</div>
+</div>
+
+<div id="app" class="wrap hidden">
+<div class="card">
+<div class="top">
+<h2>🛍️ Byenext</h2>
+<div>
+<button onclick="home()">Shop</button>
+<button onclick="orders()">My Orders</button>
+<button id="sellerBtn" class="hidden" onclick="seller()">Seller</button>
+<button id="adminBtn" class="hidden" onclick="admin()">Admin</button>
+<button onclick="logout()" class="danger">Logout</button>
+</div>
+</div>
+</div>
+
+<div id="content"></div>
+</div>
+
+<script>
+let token=localStorage.getItem("token"),me=null,products=[],cart=[];
+
+const $=id=>document.getElementById(id);
+function show(x){
+$("loginPage").classList.toggle("hidden",x!="login");
+$("signupPage").classList.toggle("hidden",x!="signup");
+$("sellerPage").classList.toggle("hidden",x!="seller");
 }
-
-.hidden{display:none!important}
-
-.login-screen{
-min-height:100vh;
-display:flex;
-align-items:center;
-justify-content:center;
-padding:20px;
-background:linear-gradient(135deg,#07112f,#312e81)
+async function api(url,opt={}){
+ opt.headers=Object.assign({"Content-Type":"application/json"},opt.headers||{});
+ if(token)opt.headers.Authorization="Bearer "+token;
+ let r=await fetch(url,opt),d=await r.json().catch(()=>({}));
+ if(!r.ok)throw Error(d.error||"Something went wrong");
+ return d;
 }
+function msg(id,t){$(id).textContent=t}
 
-.login-card{
-width:100%;
-max-width:430px;
-background:white;
-padding:30px;
-border-radius:25px;
-box-shadow:0 20px 60px #0005
+async function login(){
+ try{
+  let d=await api("/api/login",{method:"POST",body:JSON.stringify({
+   email:$("email").value,password:$("password").value
+  })});
+  token=d.token;me=d.user;localStorage.setItem("token",token);start();
+ }catch(e){msg("loginMsg",e.message)}
 }
-
-.logo-icon{
-width:70px;
-height:70px;
-margin:auto;
-display:flex;
-align-items:center;
-justify-content:center;
-border-radius:18px;
-background:linear-gradient(135deg,#3b82f6,#7c3aed);
-color:white;
-font-size:40px;
-font-weight:800
-}
-
-h1{text-align:center}
-
-.subtitle{
-text-align:center;
-color:#6b7280;
-margin-bottom:20px
-}
-
-input,textarea,select{
-width:100%;
-padding:13px;
-margin:7px 0;
-border:1px solid #d1d5db;
-border-radius:10px;
-font-size:15px
-}
-
-textarea{min-height:90px}
-
-button{
-border:0;
-border-radius:10px;
-padding:12px 17px;
-font-size:15px;
-font-weight:600;
-cursor:pointer;
-background:#2563eb;
-color:white
-}
-
-.login-card button{
-width:100%;
-margin-top:10px
-}
-
-.secondary{background:#374151}
-
-.message{
-text-align:center;
-color:#dc2626;
+async function signup(){
+ try{
+  let d=await api("/api/register",{method:"POST",
