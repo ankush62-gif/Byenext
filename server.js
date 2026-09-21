@@ -19,7 +19,6 @@ let data = {
       role: "admin"
     }
   ],
-
   products: [
     {
       id: 1,
@@ -49,14 +48,13 @@ let data = {
       sellerId: null
     }
   ],
-
   orders: []
 };
 
 if (fs.existsSync(DATA_FILE)) {
   try {
     data = JSON.parse(fs.readFileSync(DATA_FILE, "utf8"));
-  } catch (error) {
+  } catch (e) {
     console.log("Starting with fresh data");
   }
 }
@@ -65,7 +63,7 @@ if (!Array.isArray(data.users)) data.users = [];
 if (!Array.isArray(data.products)) data.products = [];
 if (!Array.isArray(data.orders)) data.orders = [];
 
-let adminUser = data.users.find(u => u.role === "admin");
+const adminUser = data.users.find(u => u.role === "admin");
 
 if (adminUser) {
   adminUser.email = "admin@byenext.com";
@@ -80,22 +78,28 @@ if (adminUser) {
   });
 }
 
-data.products = data.products.map(product => ({
-  ...product,
-  sellerId: product.sellerId ?? null
+data.products = data.products.map(p => ({
+  ...p,
+  sellerId: p.sellerId ?? null
 }));
 
 function saveData() {
-  fs.writeFileSync(
-    DATA_FILE,
-    JSON.stringify(data, null, 2)
-  );
+  fs.writeFileSync(DATA_FILE, JSON.stringify(data, null, 2));
 }
 
 const sessions = new Map();
 
-function createToken() {
+function makeToken() {
   return crypto.randomBytes(32).toString("hex");
+}
+
+function safeUser(user) {
+  return {
+    id: user.id,
+    name: user.name,
+    email: user.email,
+    role: user.role
+  };
 }
 
 function auth(req, res, next) {
@@ -105,13 +109,8 @@ function auth(req, res, next) {
     ? header.slice(7)
     : null;
 
-  const userId = token
-    ? sessions.get(token)
-    : null;
-
-  const user = data.users.find(
-    u => u.id === userId
-  );
+  const userId = token ? sessions.get(token) : null;
+  const user = data.users.find(u => u.id === userId);
 
   if (!user) {
     return res.status(401).json({
@@ -143,14 +142,23 @@ function sellerOnly(req, res, next) {
   next();
 }
 
-function safeUser(user) {
-  return {
-    id: user.id,
-    name: user.name,
-    email: user.email,
-    role: user.role
-  };
+function adminOrSeller(req, res, next) {
+  if (
+    req.user.role !== "admin" &&
+    req.user.role !== "seller"
+  ) {
+    return res.status(403).json({
+      error: "Seller or admin access required"
+    });
+  }
+
+  next();
 }
+
+
+/* =========================
+   HEALTH
+========================= */
 
 app.get("/api/health", (req, res) => {
   res.json({
@@ -159,17 +167,22 @@ app.get("/api/health", (req, res) => {
   });
 });
 
+
+/* =========================
+   PRODUCTS
+========================= */
+
 app.get("/api/products", (req, res) => {
   res.json(data.products);
 });
 
+
+/* =========================
+   CUSTOMER REGISTER
+========================= */
+
 app.post("/api/register", (req, res) => {
-  const {
-    name,
-    email,
-    password,
-    role
-  } = req.body;
+  const { name, email, password } = req.body;
 
   if (!name || !email || !password) {
     return res.status(400).json({
@@ -177,9 +190,7 @@ app.post("/api/register", (req, res) => {
     });
   }
 
-  const cleanEmail = String(email)
-    .trim()
-    .toLowerCase();
+  const cleanEmail = String(email).trim().toLowerCase();
 
   if (
     data.users.some(
@@ -191,23 +202,18 @@ app.post("/api/register", (req, res) => {
     });
   }
 
-  const userRole =
-    role === "seller"
-      ? "seller"
-      : "customer";
-
   const user = {
     id: Date.now(),
     name: String(name).trim(),
     email: cleanEmail,
     password: String(password),
-    role: userRole
+    role: "customer"
   };
 
   data.users.push(user);
   saveData();
 
-  const token = createToken();
+  const token = makeToken();
   sessions.set(token, user.id);
 
   res.json({
@@ -216,11 +222,59 @@ app.post("/api/register", (req, res) => {
   });
 });
 
+
+/* =========================
+   SELLER REGISTER
+========================= */
+
+app.post("/api/register-seller", (req, res) => {
+  const { name, email, password } = req.body;
+
+  if (!name || !email || !password) {
+    return res.status(400).json({
+      error: "Name, email and password are required"
+    });
+  }
+
+  const cleanEmail = String(email).trim().toLowerCase();
+
+  if (
+    data.users.some(
+      u => u.email.toLowerCase() === cleanEmail
+    )
+  ) {
+    return res.status(400).json({
+      error: "Email already registered"
+    });
+  }
+
+  const seller = {
+    id: Date.now(),
+    name: String(name).trim(),
+    email: cleanEmail,
+    password: String(password),
+    role: "seller"
+  };
+
+  data.users.push(seller);
+  saveData();
+
+  const token = makeToken();
+  sessions.set(token, seller.id);
+
+  res.json({
+    token,
+    user: safeUser(seller)
+  });
+});
+
+
+/* =========================
+   LOGIN
+========================= */
+
 app.post("/api/login", (req, res) => {
-  const {
-    email,
-    password
-  } = req.body;
+  const { email, password } = req.body;
 
   const cleanEmail = String(email || "")
     .trim()
@@ -238,7 +292,7 @@ app.post("/api/login", (req, res) => {
     });
   }
 
-  const token = createToken();
+  const token = makeToken();
   sessions.set(token, user.id);
 
   res.json({
@@ -247,51 +301,10 @@ app.post("/api/login", (req, res) => {
   });
 });
 
-/* CUSTOMER ORDERS */
 
-app.get("/api/orders", auth, (req, res) => {
-  if (req.user.role === "admin") {
-    return res.json(data.orders);
-  }
-
-  if (req.user.role === "seller") {
-    const sellerOrders = data.orders
-      .map(order => {
-        const items = order.items.filter(
-          item =>
-            item.sellerId === req.user.id
-        );
-
-        if (items.length === 0) {
-          return null;
-        }
-
-        const sellerSubtotal = items.reduce(
-          (sum, item) =>
-            sum + item.price * item.qty,
-          0
-        );
-
-        return {
-          ...order,
-          items,
-          sellerSubtotal
-        };
-      })
-      .filter(Boolean);
-
-    return res.json(sellerOrders);
-  }
-
-  res.json(
-    data.orders.filter(
-      order =>
-        order.userId === req.user.id
-    )
-  );
-});
-
-/* SELLER PRODUCTS */
+/* =========================
+   SELLER PRODUCTS
+========================= */
 
 app.get(
   "/api/seller/products",
@@ -300,12 +313,12 @@ app.get(
   (req, res) => {
     res.json(
       data.products.filter(
-        product =>
-          product.sellerId === req.user.id
+        p => p.sellerId === req.user.id
       )
     );
   }
 );
+
 
 app.post(
   "/api/seller/products",
@@ -326,17 +339,25 @@ app.post(
       stock === undefined
     ) {
       return res.status(400).json({
-        error:
-          "Name, price and stock are required"
+        error: "Name, price and stock are required"
       });
     }
 
-    const productPrice = Number(price);
-    const productStock = Number(stock);
+    const product = {
+      id: Date.now(),
+      name: String(name).trim(),
+      description: String(description || "").trim(),
+      price: Number(price),
+      image:
+        String(image || "").trim() ||
+        "https://via.placeholder.com/300x200?text=Byenext",
+      stock: Number(stock),
+      sellerId: req.user.id
+    };
 
     if (
-      !Number.isFinite(productPrice) ||
-      productPrice < 0
+      !Number.isFinite(product.price) ||
+      product.price < 0
     ) {
       return res.status(400).json({
         error: "Invalid price"
@@ -344,26 +365,13 @@ app.post(
     }
 
     if (
-      !Number.isInteger(productStock) ||
-      productStock < 0
+      !Number.isInteger(product.stock) ||
+      product.stock < 0
     ) {
       return res.status(400).json({
         error: "Invalid stock"
       });
     }
-
-    const product = {
-      id: Date.now(),
-      name: String(name).trim(),
-      description:
-        String(description || "").trim(),
-      price: productPrice,
-      image:
-        String(image || "").trim() ||
-        "https://via.placeholder.com/300x200?text=Byenext",
-      stock: productStock,
-      sellerId: req.user.id
-    };
 
     data.products.push(product);
     saveData();
@@ -371,6 +379,7 @@ app.post(
     res.json(product);
   }
 );
+
 
 app.put(
   "/api/seller/products/:id",
@@ -391,43 +400,55 @@ app.put(
       });
     }
 
-    if (req.body.name !== undefined) {
-      product.name =
-        String(req.body.name).trim();
+    const {
+      name,
+      description,
+      price,
+      image,
+      stock
+    } = req.body;
+
+    if (name !== undefined) {
+      product.name = String(name).trim();
     }
 
-    if (req.body.description !== undefined) {
+    if (description !== undefined) {
       product.description =
-        String(req.body.description).trim();
+        String(description).trim();
     }
 
-    if (req.body.image !== undefined) {
-      product.image =
-        String(req.body.image).trim();
-    }
+    if (price !== undefined) {
+      const newPrice = Number(price);
 
-    if (req.body.price !== undefined) {
-      const price = Number(req.body.price);
-
-      if (!Number.isFinite(price) || price < 0) {
+      if (
+        !Number.isFinite(newPrice) ||
+        newPrice < 0
+      ) {
         return res.status(400).json({
           error: "Invalid price"
         });
       }
 
-      product.price = price;
+      product.price = newPrice;
     }
 
-    if (req.body.stock !== undefined) {
-      const stock = Number(req.body.stock);
+    if (stock !== undefined) {
+      const newStock = Number(stock);
 
-      if (!Number.isInteger(stock) || stock < 0) {
+      if (
+        !Number.isInteger(newStock) ||
+        newStock < 0
+      ) {
         return res.status(400).json({
           error: "Invalid stock"
         });
       }
 
-      product.stock = stock;
+      product.stock = newStock;
+    }
+
+    if (image !== undefined) {
+      product.image = String(image).trim();
     }
 
     saveData();
@@ -435,6 +456,7 @@ app.put(
     res.json(product);
   }
 );
+
 
 app.delete(
   "/api/seller/products/:id",
@@ -444,9 +466,9 @@ app.delete(
     const id = Number(req.params.id);
 
     const index = data.products.findIndex(
-      product =>
-        product.id === id &&
-        product.sellerId === req.user.id
+      p =>
+        p.id === id &&
+        p.sellerId === req.user.id
     );
 
     if (index === -1) {
@@ -464,7 +486,10 @@ app.delete(
   }
 );
 
-/* ADMIN PRODUCTS */
+
+/* =========================
+   ADMIN PRODUCTS
+========================= */
 
 app.post(
   "/api/admin/products",
@@ -485,17 +510,25 @@ app.post(
       stock === undefined
     ) {
       return res.status(400).json({
-        error:
-          "Name, price and stock are required"
+        error: "Name, price and stock are required"
       });
     }
 
-    const productPrice = Number(price);
-    const productStock = Number(stock);
+    const product = {
+      id: Date.now(),
+      name: String(name).trim(),
+      description: String(description || "").trim(),
+      price: Number(price),
+      image:
+        String(image || "").trim() ||
+        "https://via.placeholder.com/300x200?text=Byenext",
+      stock: Number(stock),
+      sellerId: null
+    };
 
     if (
-      !Number.isFinite(productPrice) ||
-      productPrice < 0
+      !Number.isFinite(product.price) ||
+      product.price < 0
     ) {
       return res.status(400).json({
         error: "Invalid price"
@@ -503,26 +536,13 @@ app.post(
     }
 
     if (
-      !Number.isInteger(productStock) ||
-      productStock < 0
+      !Number.isInteger(product.stock) ||
+      product.stock < 0
     ) {
       return res.status(400).json({
         error: "Invalid stock"
       });
     }
-
-    const product = {
-      id: Date.now(),
-      name: String(name).trim(),
-      description:
-        String(description || "").trim(),
-      price: productPrice,
-      image:
-        String(image || "").trim() ||
-        "https://via.placeholder.com/300x200?text=Byenext",
-      stock: productStock,
-      sellerId: null
-    };
 
     data.products.push(product);
     saveData();
@@ -530,6 +550,7 @@ app.post(
     res.json(product);
   }
 );
+
 
 app.delete(
   "/api/admin/products/:id",
@@ -539,7 +560,7 @@ app.delete(
     const id = Number(req.params.id);
 
     const index = data.products.findIndex(
-      product => product.id === id
+      p => p.id === id
     );
 
     if (index === -1) {
@@ -557,13 +578,64 @@ app.delete(
   }
 );
 
-/* CREATE ORDER */
+
+/* =========================
+   ORDERS
+========================= */
+
+app.get("/api/orders", auth, (req, res) => {
+
+  if (req.user.role === "admin") {
+    return res.json(data.orders);
+  }
+
+  if (req.user.role === "seller") {
+
+    const sellerOrders = data.orders
+      .map(order => {
+
+        const items = order.items.filter(
+          item =>
+            item.sellerId === req.user.id
+        );
+
+        if (items.length === 0) {
+          return null;
+        }
+
+        const sellerSubtotal =
+          items.reduce(
+            (sum, item) =>
+              sum + item.price * item.qty,
+            0
+          );
+
+        return {
+          ...order,
+          items,
+          sellerSubtotal
+        };
+      })
+      .filter(Boolean);
+
+    return res.json(sellerOrders);
+  }
+
+  res.json(
+    data.orders.filter(
+      order =>
+        order.userId === req.user.id
+    )
+  );
+});
+
+
+/* =========================
+   CREATE ORDER
+========================= */
 
 app.post("/api/orders", auth, (req, res) => {
-  const {
-    items,
-    address
-  } = req.body;
+  const { items, address } = req.body;
 
   if (
     !Array.isArray(items) ||
@@ -584,6 +656,7 @@ app.post("/api/orders", auth, (req, res) => {
   const orderItems = [];
 
   for (const item of items) {
+
     const product = data.products.find(
       p => p.id === Number(item.id)
     );
@@ -596,7 +669,10 @@ app.post("/api/orders", auth, (req, res) => {
 
     const qty = Number(item.qty);
 
-    if (!Number.isInteger(qty) || qty < 1) {
+    if (
+      !Number.isInteger(qty) ||
+      qty < 1
+    ) {
       return res.status(400).json({
         error: "Invalid quantity"
       });
@@ -605,8 +681,7 @@ app.post("/api/orders", auth, (req, res) => {
     if (product.stock < qty) {
       return res.status(400).json({
         error:
-          product.name +
-          " is out of stock"
+          `${product.name} is out of stock`
       });
     }
 
@@ -616,9 +691,8 @@ app.post("/api/orders", auth, (req, res) => {
       productId: product.id,
       name: product.name,
       price: product.price,
-      qty: qty,
-      sellerId:
-        product.sellerId ?? null
+      qty,
+      sellerId: product.sellerId ?? null
     });
 
     product.stock -= qty;
@@ -634,46 +708,58 @@ app.post("/api/orders", auth, (req, res) => {
       (subtotal + serviceFee) * 100
     ) / 100;
 
-  const lastId =
-    data.orders.length > 0
-      ? Math.max(
-          ...data.orders.map(
-            order => order.id
-          )
-        )
-      : 0;
-
   const order = {
-    id: lastId + 1,
+    id:
+      data.orders.length
+        ? Math.max(
+            ...data.orders.map(
+              o => o.id
+            )
+          ) + 1
+        : 1,
+
     userId: req.user.id,
+
     customer: req.user.name,
+
     items: orderItems,
-    address: address,
-    subtotal: subtotal,
-    serviceFee: serviceFee,
-    total: total,
+
+    address,
+
+    subtotal,
+
+    serviceFee,
+
+    total,
+
     status: "Pending",
+
     createdAt:
       new Date().toISOString()
   };
 
   data.orders.push(order);
+
   saveData();
 
   res.json({
     orderId: order.id,
-    serviceFee: serviceFee,
-    total: total
+    serviceFee,
+    total
   });
 });
 
-/* ADMIN ORDER STATUS */
+
+/* =========================
+   UPDATE ORDER STATUS
+========================= */
 
 app.put(
   "/api/orders/:id",
   auth,
   adminOnly,
   (req, res) => {
+
     const id = Number(req.params.id);
 
     const order = data.orders.find(
@@ -686,13 +772,15 @@ app.put(
       });
     }
 
-    if (!req.body.status) {
+    const { status } = req.body;
+
+    if (!status) {
       return res.status(400).json({
         error: "Status is required"
       });
     }
 
-    order.status = req.body.status;
+    order.status = status;
 
     saveData();
 
@@ -700,9 +788,21 @@ app.put(
   }
 );
 
+
+/* =========================
+   STATIC WEBSITE
+========================= */
+
 app.use(
-  express.static(__dirname)
+  express.static(
+    path.join(__dirname)
+  )
 );
+
+
+/* =========================
+   START SERVER
+========================= */
 
 app.listen(PORT, () => {
   console.log(
